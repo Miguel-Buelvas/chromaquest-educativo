@@ -962,99 +962,108 @@ checkMixture(colors) {
     }
 
     applyMazeGameStyles() {
-        const style = document.createElement('style');
-        style.textContent = `
-            .maze-game {
-                text-align: center;
-                max-width: 500px;
-                margin: 0 auto;
-            }
-            .maze-instructions h3 {
-                color: white;
-                font-size: 1.8rem;
-                margin-bottom: 1rem;
-                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            }
-            .maze-instructions p {
-                color: #e0e0e0;
-                font-size: 1.1rem;
-                margin-bottom: 2rem;
-            }
-            .maze-container {
-                position: relative;
-                display: inline-block;
-                margin-bottom: 2rem;
-                border: 3px solid white;
-                border-radius: 15px;
-                overflow: hidden;
-                box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            }
-            .maze-grid {
-                display: grid;
-                grid-template-columns: repeat(8, 40px);
-                grid-template-rows: repeat(7, 40px);
-                gap: 0;
-            }
-            .maze-cell {
-                width: 40px;
-                height: 40px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 1.5rem;
-            }
-            .maze-cell.wall {
-                background: #666;
-            }
-            .maze-cell.path {
-                background: #f0f0f0;
-            }
-            .maze-cell.exit {
-                background: #ff4444;
-                animation: pulse 1s infinite;
-            }
-            .player {
-                position: absolute;
-                width: 30px;
-                height: 30px;
-                font-size: 1.5rem;
-                transition: all 0.3s ease;
-                z-index: 10;
-                left: 5px;
-                top: 5px;
-            }
-            .maze-controls {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 0.5rem;
-            }
-            .maze-controls div {
-                display: flex;
-                gap: 0.5rem;
-            }
-            .maze-btn {
-                width: 50px;
-                height: 50px;
-                border: none;
-                border-radius: 10px;
-                background: linear-gradient(45deg, #667eea, #764ba2);
-                color: white;
-                font-size: 1.5rem;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            }
-            .maze-btn:hover {
-                transform: scale(1.1);
-                box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-            }
-            .maze-btn:active {
-                transform: scale(0.9);
-            }
-        `;
-        document.head.appendChild(style);
-    }
+    const style = document.createElement('style');
+    style.textContent = `
+        .maze-game {
+            text-align: center;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        .maze-instructions h3 {
+            color: white;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+        .maze-instructions p {
+            color: #e0e0e0;
+            font-size: 1.1rem;
+            margin-bottom: 1.5rem;
+        }
+        .maze-wrapper {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        .maze-container {
+            position: relative;
+            display: inline-block;
+            border: 3px solid white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+        .maze-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 40px);
+            grid-template-rows: repeat(7, 40px);
+            gap: 0;
+        }
+        .maze-cell {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        .maze-cell.wall {
+            background: #666;
+        }
+        .maze-cell.path {
+            background: #f0f0f0;
+        }
+        .maze-cell.exit {
+            background: #ff4444;
+            animation: pulse 1s infinite;
+        }
+        .player {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+            z-index: 10;
+            left: 5px;
+            top: 5px;
+        }
+        .maze-controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .maze-controls div {
+            display: flex;
+            gap: 0.5rem;
+        }
+        .maze-btn {
+            width: 50px;
+            height: 50px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .maze-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        }
+        .maze-btn:active {
+            transform: scale(0.9);
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+}
 
     applyShapeGameStyles() {
         const style = document.createElement('style');
