@@ -230,102 +230,111 @@ class ChromaQuest {
     }
 
     createMixingGame(container) {
-        const gameUI = document.createElement('div');
-        gameUI.className = 'mixing-game';
-        gameUI.innerHTML = `
-            <div class="mixing-instructions">
-                <h3>🎨 Mezcla los colores primarios</h3>
-                <p>Arrastra los colores primarios para crear colores secundarios</p>
-                <div class="target-color" id="targetColor">Crea el color: AZUL</div>
+    // Definir objetivo del nivel: crear verde (azul + amarillo)
+    this.mixingTarget = {
+        name: "verde",
+        required: ['blue', 'yellow'],
+        resultColor: '#00FF00'
+    };
+
+    const gameUI = document.createElement('div');
+    gameUI.className = 'mixing-game';
+    gameUI.innerHTML = `
+        <div class="mixing-instructions">
+            <h3>🎨 Mezcla los colores primarios</h3>
+            <p>Arrastra los colores primarios para crear: <strong>${this.mixingTarget.name}</strong></p>
+            <div class="target-color" id="targetColor" style="background: ${this.mixingTarget.resultColor};"></div>
+        </div>
+        <div class="mixing-area">
+            <div class="color-sources">
+                <div class="color-source" draggable="true" data-color="red" style="background: #FF0000;">🔴</div>
+                <div class="color-source" draggable="true" data-color="yellow" style="background: #FFFF00;">🟡</div>
+                <div class="color-source" draggable="true" data-color="blue" style="background: #0000FF;">🔵</div>
             </div>
-            <div class="mixing-area">
-                <div class="color-sources">
-                    <div class="color-source" draggable="true" data-color="red" style="background: #FF0000;">🔴</div>
-                    <div class="color-source" draggable="true" data-color="yellow" style="background: #FFFF00;">🟡</div>
-                    <div class="color-source" draggable="true" data-color="blue" style="background: #0000FF;">🔵</div>
-                </div>
-                <div class="mixing-pot" id="mixingPot">
-                    <div class="pot-visual">🥣</div>
-                    <p>Arrastra los colores aquí</p>
-                </div>
-                <div class="result-display" id="resultDisplay"></div>
+            <div class="mixing-pot" id="mixingPot">
+                <div class="pot-visual">🥣</div>
+                <p>Arrastra los colores aquí</p>
             </div>
-        `;
+            <div class="result-display" id="resultDisplay"></div>
+        </div>
+    `;
+    container.appendChild(gameUI);
+    this.setupMixingGame();
+    this.applyMixingGameStyles();
+}
 
-        container.appendChild(gameUI);
-        this.setupMixingGame();
-        this.applyMixingGameStyles();
-    }
+setupMixingGame() {
+    const sources = document.querySelectorAll('.color-source');
+    const pot = document.getElementById('mixingPot');
+    this.mixedColors = [];
 
-    setupMixingGame() {
-        const sources = document.querySelectorAll('.color-source');
-        const pot = document.getElementById('mixingPot');
-        let mixedColors = [];
-
-        sources.forEach(source => {
-            source.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('color', e.target.dataset.color);
-            });
+    sources.forEach(source => {
+        source.addEventListener('dragstart', (e) => {
+            e.dataTransfer.setData('color', e.target.dataset.color);
         });
+    });
 
-        pot.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            pot.style.backgroundColor = '#f0f0f0';
-        });
+    pot.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        pot.style.backgroundColor = '#f0f0f0';
+    });
 
-        pot.addEventListener('dragleave', () => {
-            pot.style.backgroundColor = 'transparent';
-        });
+    pot.addEventListener('dragleave', () => {
+        pot.style.backgroundColor = 'transparent';
+    });
 
-        pot.addEventListener('drop', (e) => {
-            e.preventDefault();
-            const color = e.dataTransfer.getData('color');
-            mixedColors.push(color);
-            
+    pot.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const color = e.dataTransfer.getData('color');
+        // Evitar duplicados (no necesitas dos rojos)
+        if (!this.mixedColors.includes(color)) {
+            this.mixedColors.push(color);
             this.playSound('drop');
-            this.updateMixingPot(mixedColors);
-            
-            if (mixedColors.length >= 2) {
+            this.updateMixingPot(this.mixedColors);
+            // Evaluar inmediatamente si ya se tienen suficientes colores
+            if (this.mixedColors.length >= 2) {
                 setTimeout(() => {
-                    this.checkMixture(mixedColors);
-                }, 1000);
+                    this.checkMixture(this.mixedColors);
+                }, 500);
             }
-        });
-    }
-
-    updateMixingPot(colors) {
-        const pot = document.getElementById('mixingPot');
-        const display = document.getElementById('resultDisplay');
-        
-        if (colors.length === 1) {
-            pot.style.backgroundColor = colors[0];
-        } else if (colors.length === 2) {
-            const gradient = `linear-gradient(45deg, ${colors[0]}, ${colors[1]})`;
-            pot.style.background = gradient;
-        }
-        
-        display.innerHTML = `<p>Colores mezclados: ${colors.length}/2</p>`;
-    }
-
-    checkMixture(colors) {
-        const targetColor = 'blue'; // Objetivo: azul
-        let correct = false;
-
-        if (colors.includes('blue') && colors.length === 1) {
-            correct = true;
-        }
-
-        if (correct) {
-            this.playSound('success');
-            this.levelComplete();
         } else {
-            this.showError('¡Mezcla incorrecta! Intenta de nuevo.');
-            setTimeout(() => {
-                this.loadLevel(this.currentLevel);
-            }, 2000);
+            this.playSound('error');
         }
+    });
+}
+
+updateMixingPot(colors) {
+    const pot = document.getElementById('mixingPot');
+    const display = document.getElementById('resultDisplay');
+
+    if (colors.length === 1) {
+        const colorMap = { red: '#FF0000', yellow: '#FFFF00', blue: '#0000FF' };
+        pot.style.background = colorMap[colors[0]] || 'transparent';
+    } else if (colors.length === 2) {
+        // Mostrar mezcla visual (gradiente)
+        const colorMap = { red: '#FF0000', yellow: '#FFFF00', blue: '#0000FF' };
+        const c1 = colorMap[colors[0]] || '#000';
+        const c2 = colorMap[colors[1]] || '#000';
+        pot.style.background = `linear-gradient(45deg, ${c1}, ${c2})`;
     }
 
+    display.innerHTML = `<p>Colores mezclados: ${colors.length}</p>`;
+}
+
+checkMixture(colors) {
+    const required = this.mixingTarget.required;
+    const isCorrect = required.every(c => colors.includes(c)) && colors.length === required.length;
+
+    if (isCorrect) {
+        this.playSound('success');
+        this.levelComplete();
+    } else {
+        this.showError(`¡Mezcla incorrecta! Intenta crear ${this.mixingTarget.name}.`);
+        setTimeout(() => {
+            this.loadLevel(this.currentLevel);
+        }, 2000);
+    }
+}
     createMazeGame(container) {
         const gameUI = document.createElement('div');
         gameUI.className = 'maze-game';
