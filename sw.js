@@ -1,98 +1,58 @@
-const CACHE_NAME = 'chromaquest-v1.0.1'; // Incrementa versión si cambias caché
+const CACHE_NAME = 'chromaquest-v1.0.2';
 const urlsToCache = [
+  '/',
   '/index.html',
   '/game.js',
   '/manifest.json',
-  '/icon-192.png' // ¡Asegúrate de que exista!
+  '/icon-192.png',
+  '/offline.html',
+  'https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@400;600;700&display=swap',
+  'https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js',
+  'https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js',
+  'https://unpkg.com/splitting@1.0.6/dist/splitting.min.js'
 ];
 
+// Instalar y cachear recursos
 self.addEventListener('install', event => {
   console.log('Service Worker: Instalando...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Service Worker: Caché abierta');
-        return cache.addAll(urlsToCache);
-      })
-      .then(() => {
-        console.log('Service Worker: Archivos cacheados');
-        return self.skipWaiting();
-      })
-      .catch(error => {
-        console.error('Service Worker: Error al cachear', error);
-      })
+      .then(cache => cache.addAll(urlsToCache))
+      .then(() => self.skipWaiting())
+      .catch(err => console.error('SW: Error al cachear', err))
   );
 });
 
+// Activar y limpiar versiones antiguas
 self.addEventListener('activate', event => {
   console.log('Service Worker: Activando...');
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Service Worker: Eliminando caché antigua', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => {
-      console.log('Service Worker: Activado');
-      return self.clients.claim();
-    })
+    caches.keys().then(keys =>
+      Promise.all(
+        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
+// Interceptar peticiones
 self.addEventListener('fetch', event => {
-  // Solo interceptar peticiones de tu dominio
-  if (!event.request.url.startsWith(self.location.origin)) {
-    return; // Dejar que los CDN se manejen normalmente
-  }
-
-  // Solo cachear peticiones GET
-  if (event.request.method !== 'GET') {
+  if (!event.request.url.startsWith(self.location.origin) || event.request.method !== 'GET') {
     return;
   }
 
   event.respondWith(
     caches.match(event.request)
-      .then(response => {
-        if (response) {
-          console.log('Service Worker: Sirviendo desde caché', event.request.url);
-          return response;
-        }
-
-        // Clonar la petición porque se consume una vez
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest)
-          .then(response => {
-            // Verificar respuesta válida
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          })
-          .catch(() => {
-            // Si es HTML, servir offline
-            if (event.request.headers.get('accept').includes('text/html')) {
-              return caches.match('/index.html');
-            }
-          });
-      })
+      .then(response => response || fetch(event.request).then(networkRes => {
+        if (!networkRes || networkRes.status !== 200) return networkRes;
+        const resClone = networkRes.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, resClone));
+        return networkRes;
+      }).catch(() => caches.match('/offline.html')))
   );
 });
 
-// Mensajes (para actualizaciones manuales)
+// Permitir actualización manual
 self.addEventListener('message', event => {
-  if (event.data?.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting();
 });
