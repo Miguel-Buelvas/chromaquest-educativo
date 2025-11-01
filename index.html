@@ -1,505 +1,440 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ChromaQuest: El Mundo sin Color</title>
-    <meta name="description" content="Juego educativo para niños de 10-14 años sobre colores y creatividad">
-    <meta name="theme-color" content="#667eea">
-    <link rel="manifest" href="manifest.json">
-    <link rel="icon" type="image/png" href="icon-192.png">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-    <link href="https://unpkg.com/splitting@1.0.6/dist/splitting.css" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
-    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ChromaQuest: El Mundo sin Color</title>
+  <meta name="description" content="Juego educativo para niños de 10-14 años sobre colores y creatividad.">
+  <meta name="theme-color" content="#667eea">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/splitting@1.0.6/dist/splitting.css" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js" defer></script>
+  <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.min.js" defer></script>
 
-        body {
-            font-family: 'Nunito', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-            overflow: hidden;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      overflow: hidden;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        .game-container {
-            width: 100vw;
-            height: 100vh;
-            position: relative;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
+    /* Contenedor general */
+    .game-container {
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
 
-        .main-menu {
-            text-align: center;
-            z-index: 10;
-            animation: fadeInUp 1s ease-out;
-        }
+    /* Formas flotantes decorativas */
+    .floating-shapes {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+    .shape {
+      position: absolute;
+      opacity: 0.1;
+      animation: float 6s ease-in-out infinite;
+      font-size: 2rem;
+    }
+    .shape:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
+    .shape:nth-child(2) { top: 20%; right: 15%; animation-delay: 2s; }
+    .shape:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 4s; }
+    .shape:nth-child(4) { bottom: 10%; right: 10%; animation-delay: 1s; }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-20px) rotate(180deg); }
+    }
 
-        .game-title {
-            font-size: clamp(2.5rem, 8vw, 4rem);
-            font-weight: 800;
-            color: white;
-            margin-bottom: 1rem;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            letter-spacing: -1px;
-        }
+    /* Menú principal */
+    .main-menu {
+      text-align: center;
+      z-index: 10;
+      animation: fadeInUp 1s ease-out;
+    }
+    .game-title {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      font-weight: 800;
+      color: white;
+      margin-bottom: 1rem;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+      letter-spacing: -1px;
+    }
+    .subtitle {
+      font-size: clamp(1rem, 3vw, 1.5rem);
+      color: #e0e0e0;
+      margin-bottom: 3rem;
+      font-weight: 400;
+    }
+    .menu-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+      align-items: center;
+    }
+    .menu-btn {
+      background: linear-gradient(45deg, #ff6b6b, #ffa726);
+      color: white;
+      border: none;
+      padding: 1.2rem 3rem;
+      font-size: 1.3rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      font-family: 'Poppins', sans-serif;
+      min-width: 250px;
+      position: relative;
+      overflow: hidden;
+    }
+    .menu-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 35px rgba(0,0,0,0.3); }
+    .menu-btn:active { transform: translateY(-1px); }
+    .menu-btn.secondary { background: linear-gradient(45deg, #4facfe, #00f2fe); }
+    .menu-btn.settings { background: linear-gradient(45deg, #43e97b, #38f9d7); }
 
-        .subtitle {
-            font-size: clamp(1rem, 3vw, 1.5rem);
-            color: #e0e0e0;
-            margin-bottom: 3rem;
-            font-weight: 400;
-        }
+    /* Animaciones */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-        .menu-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 1.5rem;
-            align-items: center;
-        }
+    /* Nivel de juego */
+    .game-level {
+      display: none;
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 5;
+    }
+    .level-header {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .level-title {
+      color: white;
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+    }
+    .score-display {
+      color: white;
+      font-size: 1.2rem;
+      font-weight: 600;
+      background: rgba(0,0,0,0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+    }
+    .back-btn {
+      background: rgba(255,255,255,0.2);
+      border: 2px solid white;
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .back-btn:hover { background: rgba(255,255,255,0.3); }
 
-        .menu-btn {
-            background: linear-gradient(45deg, #ff6b6b, #ffa726);
-            color: white;
-            border: none;
-            padding: 1.2rem 3rem;
-            font-size: 1.3rem;
-            font-weight: 600;
-            border-radius: 50px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            font-family: 'Poppins', sans-serif;
-            min-width: 250px;
-            position: relative;
-            overflow: hidden;
-        }
+    .game-area {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      z-index: 5;
+    }
 
-        .menu-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 12px 35px rgba(0,0,0,0.3);
-        }
+    /* Paleta de colores */
+    .color-palette {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 1rem;
+      background: rgba(255,255,255,0.9);
+      padding: 1rem;
+      border-radius: 50px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+      z-index: 10;
+    }
+    .color-dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 3px solid white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+    .color-dot:hover { transform: scale(1.1); }
+    .color-dot.unlocked { animation: pulse 2s infinite; }
+    .color-dot.locked { background: #ccc !important; opacity: 0.5; cursor: not-allowed; }
+    #rainbowDot { border: 3px solid #333; }
 
-        .menu-btn:active {
-            transform: translateY(-1px);
-        }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
+      70% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+    }
 
-        .menu-btn.secondary {
-            background: linear-gradient(45deg, #4facfe, #00f2fe);
-        }
+    /* Modales */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 20px;
+      text-align: center;
+      max-width: 500px;
+      margin: 1rem;
+    }
+    .modal h2 { color: #333; margin-bottom: 1rem; font-size: 2rem; }
+    .modal p { color: #666; margin-bottom: 2rem; font-size: 1.1rem; }
+    .modal-btn {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+      color: white;
+      border: none;
+      padding: 1rem 2rem;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+    .modal-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
 
-        .menu-btn.settings {
-            background: linear-gradient(45deg, #43e97b, #38f9d7);
-        }
+    /* Panel de ajustes */
+    .settings-panel {
+      display: none;
+      position: absolute;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      padding: 2rem;
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+      z-index: 100;
+      min-width: 300px;
+    }
+    .settings-panel h3 { margin-bottom: 1.5rem; color: #333; text-align: center; }
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding: 0.5rem 0;
+    }
+    .setting-item label { color: #555; font-weight: 600; }
+    .toggle-switch {
+      position: relative;
+      width: 60px; height: 30px;
+      background: #ccc;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    .toggle-switch.active { background: #4facfe; }
+    .toggle-slider {
+      position: absolute;
+      top: 3px; left: 3px;
+      width: 24px; height: 24px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.3s;
+    }
+    .toggle-switch.active .toggle-slider { transform: translateX(30px); }
+    .volume-slider {
+      width: 100px; height: 5px;
+      border-radius: 5px;
+      background: #ddd;
+      outline: none; cursor: pointer;
+    }
+    .volume-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 15px; height: 15px;
+      border-radius: 50%;
+      background: #4facfe;
+      cursor: pointer;
+    }
 
-        .game-level {
-            display: none;
-            width: 100%;
-            height: 100%;
-            position: relative;
-        }
-
-        .level-header {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 5;
-        }
-
-        .level-title {
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        .score-display {
-            color: white;
-            font-size: 1.2rem;
-            font-weight: 600;
-            background: rgba(0,0,0,0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 25px;
-        }
-
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: 2px solid white;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover {
-            background: rgba(255,255,255,0.3);
-        }
-
-        .game-area {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-
-        .floating-shapes {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .shape {
-            position: absolute;
-            opacity: 0.1;
-            animation: float 6s ease-in-out infinite;
-            font-size: 2rem;
-        }
-
-        .shape:nth-child(1) { top: 10%; left: 10%; animation-delay: 0s; }
-        .shape:nth-child(2) { top: 20%; right: 15%; animation-delay: 2s; }
-        .shape:nth-child(3) { bottom: 30%; left: 20%; animation-delay: 4s; }
-        .shape:nth-child(4) { bottom: 10%; right: 10%; animation-delay: 1s; }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); }
-            50% { transform: translateY(-20px) rotate(180deg); }
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .color-palette {
-            position: absolute;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: flex;
-            gap: 1rem;
-            background: rgba(255,255,255,0.9);
-            padding: 1rem;
-            border-radius: 50px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
-
-        .color-dot {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            border: 3px solid white;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .color-dot:hover {
-            transform: scale(1.1);
-        }
-
-        .color-dot.unlocked {
-            animation: pulse 2s infinite;
-        }
-
-        .color-dot.locked {
-            background: #ccc !important;
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        #rainbowDot {
-            border: 3px solid #333;
-        }
-
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
-            70% { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
-            100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 20px;
-            text-align: center;
-            max-width: 500px;
-            margin: 1rem;
-        }
-
-        .modal h2 {
-            color: #333;
-            margin-bottom: 1rem;
-            font-size: 2rem;
-        }
-
-        .modal p {
-            color: #666;
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-        }
-
-        .modal-btn {
-            background: linear-gradient(45deg, #667eea, #764ba2);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 1.1rem;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .modal-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-        }
-
-        .settings-panel {
-            display: none;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: white;
-            padding: 2rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
-            z-index: 100;
-            min-width: 300px;
-        }
-
-        .settings-panel h3 {
-            margin-bottom: 1.5rem;
-            color: #333;
-            text-align: center;
-        }
-
-        .setting-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-            padding: 0.5rem 0;
-        }
-
-        .setting-item label {
-            color: #555;
-            font-weight: 600;
-        }
-
-        .toggle-switch {
-            position: relative;
-            width: 60px;
-            height: 30px;
-            background: #ccc;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-
-        .toggle-switch.active {
-            background: #4facfe;
-        }
-
-        .toggle-slider {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 24px;
-            height: 24px;
-            background: white;
-            border-radius: 50%;
-            transition: transform 0.3s;
-        }
-
-        .toggle-switch.active .toggle-slider {
-            transform: translateX(30px);
-        }
-
-        .volume-slider {
-            width: 100px;
-            height: 5px;
-            border-radius: 5px;
-            background: #ddd;
-            outline: none;
-            cursor: pointer;
-        }
-
-        .volume-slider::-webkit-slider-thumb {
-            appearance: none;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            background: #4facfe;
-            cursor: pointer;
-        }
-    </style>
+    /* Modo daltonismo */
+    body.colorblind-mode .color-dot {
+      filter: grayscale(60%) contrast(1.4);
+    }
+  </style>
 </head>
+
 <body>
-    <div class="game-container">
-        <!-- Menú Principal -->
-        <div class="main-menu" id="mainMenu">
-            <h1 class="game-title">ChromaQuest</h1>
-            <p class="subtitle">El Mundo sin Color</p>
-            <div class="menu-buttons">
-                <button class="menu-btn" onclick="startGame()">🎮 Jugar</button>
-                <button class="menu-btn secondary" onclick="showGallery()">🎨 Galería de Colores</button>
-                <button class="menu-btn settings" onclick="showSettings()">⚙️ Ajustes</button>
-            </div>
-        </div>
-
-        <!-- Área de Juego -->
-        <div class="game-level" id="gameLevel">
-            <div class="level-header">
-                <button class="back-btn" onclick="goBack()">← Volver</button>
-                <h2 class="level-title" id="levelTitle">Nivel 1: El Bosque Gris</h2>
-                <div class="score-display" id="scoreDisplay">Puntos: 0</div>
-            </div>
-            <div class="game-area" id="gameArea"></div>
-            <div class="color-palette" id="colorPalette">
-                <div class="color-dot locked" id="greenDot" style="background: #4CAF50;" title="Verde"></div>
-                <div class="color-dot locked" id="blueDot" style="background: #2196F3;" title="Azul"></div>
-                <div class="color-dot locked" id="redDot" style="background: #F44336;" title="Rojo"></div>
-                <div class="color-dot locked" id="orangeDot" style="background: #FF9800;" title="Naranja"></div>
-                <div class="color-dot locked" id="purpleDot" style="background: #9C27B0;" title="Morado"></div>
-                <div class="color-dot locked" id="yellowDot" style="background: #FFEB3B;" title="Amarillo"></div>
-                <div class="color-dot locked" id="pinkDot" style="background: #E91E63;" title="Rosa"></div>
-                <div class="color-dot locked" id="turquoiseDot" style="background: #00BCD4;" title="Turquesa"></div>
-                <div class="color-dot locked" id="whiteDot" style="background: #FFFFFF;" title="Blanco"></div>
-                <div class="color-dot locked" id="rainbowDot" style="background: linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet);" title="Arcoíris"></div>
-            </div>
-        </div>
-
-        <!-- Formas flotantes decorativas -->
-        <div class="floating-shapes">
-            <div class="shape" aria-hidden="true">🔴</div>
-            <div class="shape" aria-hidden="true">🔵</div>
-            <div class="shape" aria-hidden="true">🟡</div>
-            <div class="shape" aria-hidden="true">🟢</div>
-        </div>
-
-        <!-- Panel de Ajustes -->
-        <div class="settings-panel" id="settingsPanel">
-            <h3>⚙️ Ajustes</h3>
-            <div class="setting-item">
-                <label>🎵 Música</label>
-                <input type="range" class="volume-slider" id="musicVolume" min="0" max="100" value="70">
-            </div>
-            <div class="setting-item">
-                <label>🔊 Efectos de Sonido</label>
-                <input type="range" class="volume-slider" id="sfxVolume" min="0" max="100" value="80">
-            </div>
-            <div class="setting-item">
-                <label>🎤 Voz en Off</label>
-                <div class="toggle-switch active" id="voiceToggle" onclick="toggleVoice()">
-                    <div class="toggle-slider"></div>
-                </div>
-            </div>
-            <div class="setting-item">
-                <label>🌈 Modo Daltonismo</label>
-                <div class="toggle-switch" id="colorblindToggle" onclick="toggleColorblind()">
-                    <div class="toggle-slider"></div>
-                </div>
-            </div>
-            <button class="menu-btn" onclick="closeSettings()" style="margin-top: 1rem; width: 100%;">Cerrar</button>
-        </div>
+  <div class="game-container">
+    <!-- Formas flotantes -->
+    <div class="floating-shapes">
+      <div class="shape" aria-hidden="true">🔴</div>
+      <div class="shape" aria-hidden="true">🔵</div>
+      <div class="shape" aria-hidden="true">🟡</div>
+      <div class="shape" aria-hidden="true">🟢</div>
     </div>
 
-    <!-- Modal de Victoria -->
-    <div class="modal" id="victoryModal">
-        <div class="modal-content">
-            <h2>¡Brillooo! 🎉</h2>
-            <p>¡Has restaurado el color y completado el nivel!</p>
-            <button class="modal-btn" onclick="nextLevel()">Siguiente Nivel →</button>
-        </div>
+    <!-- Menú principal -->
+    <div class="main-menu" id="mainMenu">
+      <h1 class="game-title">ChromaQuest</h1>
+      <p class="subtitle">El Mundo sin Color</p>
+      <div class="menu-buttons">
+        <button class="menu-btn" onclick="startGame()" aria-label="Jugar ChromaQuest">🎮 Jugar</button>
+        <button class="menu-btn secondary" onclick="showGallery()" aria-label="Ver galería de colores">🎨 Galería de Colores</button>
+        <button class="menu-btn settings" onclick="showSettings()" aria-label="Ajustes del juego">⚙️ Ajustes</button>
+      </div>
     </div>
 
-    <!-- Modal de Bienvenida -->
-    <div class="modal" id="welcomeModal" style="display: flex;">
-        <div class="modal-content">
-            <h2>¡Bienvenido a ChromaQuest! 🎨</h2>
-            <p>Ayuda a Lúa a devolverle el color al mundo mágico. Cada nivel que completes restaurará un color perdido.</p>
-            <p><strong>Controles:</strong> Toca, arrastra y usa tu creatividad para resolver los desafíos.</p>
-            <button class="modal-btn" onclick="closeWelcomeModal()">¡Comenzar Aventura!</button>
-        </div>
+    <!-- Área de juego -->
+    <div class="game-level" id="gameLevel">
+      <div class="level-header">
+        <button class="back-btn" onclick="goBack()">← Volver</button>
+        <h2 class="level-title" id="levelTitle">Nivel 1: El Bosque Gris</h2>
+        <div class="score-display" id="scoreDisplay">Puntos: 0</div>
+      </div>
+      <div class="game-area" id="gameArea"></div>
+
+      <!-- Paleta de colores -->
+      <div class="color-palette" id="colorPalette">
+        <div class="color-dot locked" id="greenDot" style="background:#4CAF50;" title="Verde"></div>
+        <div class="color-dot locked" id="blueDot" style="background:#2196F3;" title="Azul"></div>
+        <div class="color-dot locked" id="redDot" style="background:#F44336;" title="Rojo"></div>
+        <div class="color-dot locked" id="orangeDot" style="background:#FF9800;" title="Naranja"></div>
+        <div class="color-dot locked" id="purpleDot" style="background:#9C27B0;" title="Morado"></div>
+        <div class="color-dot locked" id="yellowDot" style="background:#FFEB3B;" title="Amarillo"></div>
+        <div class="color-dot locked" id="pinkDot" style="background:#E91E63;" title="Rosa"></div>
+        <div class="color-dot locked" id="turquoiseDot" style="background:#00BCD4;" title="Turquesa"></div>
+        <div class="color-dot locked" id="whiteDot" style="background:#FFFFFF;" title="Blanco"></div>
+        <div class="color-dot locked" id="rainbowDot" style="background:linear-gradient(45deg, red, orange, yellow, green, blue, indigo, violet);" title="Arcoíris"></div>
+      </div>
     </div>
 
-    <!-- Scripts globales para ajustes -->
-    <script>
-        function toggleVoice() {
-            if (window.game) {
-                game.gameSettings.voiceEnabled = !game.gameSettings.voiceEnabled;
-                game.saveSettings();
-                document.getElementById('voiceToggle').classList.toggle('active', game.gameSettings.voiceEnabled);
-            }
-        }
-        function toggleColorblind() {
-            if (window.game) {
-                game.gameSettings.colorblindMode = !game.gameSettings.colorblindMode;
-                game.saveSettings();
-                document.getElementById('colorblindToggle').classList.toggle('active', game.gameSettings.colorblindMode);
-            }
-        }
-        function closeWelcomeModal() {
-            document.getElementById('welcomeModal').style.display = 'none';
-        }
-        function showGallery() {
-            alert('🎨 Galería de colores desbloqueados:\nPróximamente disponible.');
-        }
-    </script>
+    <!-- Panel de ajustes -->
+    <div class="settings-panel" id="settingsPanel">
+      <h3>⚙️ Ajustes</h3>
+      <div class="setting-item">
+        <label>🎵 Música</label>
+        <input type="range" class="volume-slider" id="musicVolume" min="0" max="100" value="70">
+      </div>
+      <div class="setting-item">
+        <label>🔊 Efectos de Sonido</label>
+        <input type="range" class="volume-slider" id="sfxVolume" min="0" max="100" value="80">
+      </div>
+      <div class="setting-item">
+        <label>🎤 Voz en Off</label>
+        <div class="toggle-switch active" id="voiceToggle" onclick="toggleVoice()">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+      <div class="setting-item">
+        <label>🌈 Modo Daltonismo</label>
+        <div class="toggle-switch" id="colorblindToggle" onclick="toggleColorblind()">
+          <div class="toggle-slider"></div>
+        </div>
+      </div>
+      <button class="menu-btn" onclick="closeSettings()" style="margin-top:1rem;width:100%;">Cerrar</button>
+    </div>
+  </div>
 
-    <!-- Service Worker (opcional) -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').catch(console.warn);
-            });
-        }
-    </script>
+  <!-- Modal de victoria -->
+  <div class="modal" id="victoryModal">
+    <div class="modal-content">
+      <h2>¡Brillooo! 🎉</h2>
+      <p>¡Has restaurado el color y completado el nivel!</p>
+      <button class="modal-btn" onclick="nextLevel()">Siguiente Nivel →</button>
+    </div>
+  </div>
 
-    <!-- Motor del juego -->
-    <script src="game.js"></script>
+  <!-- Modal de bienvenida -->
+  <div class="modal" id="welcomeModal">
+    <div class="modal-content">
+      <h2>¡Bienvenido a ChromaQuest! 🎨</h2>
+      <p>Ayuda a Lúa a devolverle el color al mundo mágico. Cada nivel que completes restaurará un color perdido.</p>
+      <p><strong>Controles:</strong> Toca, arrastra y usa tu creatividad para resolver los desafíos.</p>
+      <button class="modal-btn" onclick="closeWelcomeModal()">¡Comenzar Aventura!</button>
+    </div>
+  </div>
+
+  <!-- Scripts globales -->
+  <script>
+    function toggleVoice() {
+      if (window.game) {
+        game.gameSettings.voiceEnabled = !game.gameSettings.voiceEnabled;
+        game.saveSettings();
+        document.getElementById('voiceToggle').classList.toggle('active', game.gameSettings.voiceEnabled);
+      }
+    }
+    function toggleColorblind() {
+      if (window.game) {
+        game.gameSettings.colorblindMode = !game.gameSettings.colorblindMode;
+        game.saveSettings();
+        document.body.classList.toggle('colorblind-mode', game.gameSettings.colorblindMode);
+        document.getElementById('colorblindToggle').classList.toggle('active', game.gameSettings.colorblindMode);
+      }
+    }
+    function closeWelcomeModal() {
+      document.getElementById('welcomeModal').style.display = 'none';
+    }
+    function showGallery() {
+      alert('🎨 Galería de colores desbloqueados:\nPróximamente disponible.');
+    }
+    window.addEventListener('load', () => {
+      document.getElementById('welcomeModal').style.display = 'flex';
+    });
+  </script>
+
+  <!-- Service Worker -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch(console.warn);
+      });
+    }
+  </script>
+
+  <!-- Motor del juego -->
+  <script src="game.js" defer></script>
 </body>
 </html>
