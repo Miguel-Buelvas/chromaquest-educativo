@@ -505,86 +505,78 @@ checkMixture(colors) {
     }
 
     createRhythmGame(container) {
-        const gameUI = document.createElement('div');
-        gameUI.className = 'rhythm-game';
-        gameUI.innerHTML = `
-            <div class="rhythm-instructions">
-                <h3>🎵 ¡Toca al ritmo!</h3>
-                <p>Toca los botones cuando las notas lleguen al centro</p>
-            </div>
-            <div class="rhythm-track" id="rhythmTrack">
-                <div class="track-line"></div>
-                <div class="hit-zone"></div>
-            </div>
-            <div class="rhythm-controls">
-                <button class="rhythm-btn" onclick="game.hitNote(0)">🔴</button>
-                <button class="rhythm-btn" onclick="game.hitNote(1)">🔵</button>
-                <button class="rhythm-btn" onclick="game.hitNote(2)">🟡</button>
-                <button class="rhythm-btn" onclick="game.hitNote(3)">🟢</button>
-            </div>
-        `;
-
-        container.appendChild(gameUI);
-        this.startRhythmGame();
-        this.applyRhythmGameStyles();
-    }
+    const gameUI = document.createElement('div');
+    gameUI.className = 'rhythm-game';
+    gameUI.innerHTML = `
+        <div class="rhythm-instructions">
+            <h3>🎵 ¡Toca al ritmo!</h3>
+            <p>Toca los botones cuando las notas lleguen al centro</p>
+        </div>
+        <div class="rhythm-track" id="rhythmTrack">
+            <div class="track-line"></div>
+            <div class="hit-zone"></div>
+        </div>
+        <div class="rhythm-controls">
+            <button class="rhythm-btn" onclick="game.hitNote(0)">🔴</button>
+            <button class="rhythm-btn" onclick="game.hitNote(1)">🔵</button>
+            <button class="rhythm-btn" onclick="game.hitNote(2)">🟡</button>
+            <button class="rhythm-btn" onclick="game.hitNote(3)">🟢</button>
+        </div>
+    `;
+    container.appendChild(gameUI);
+    this.startRhythmGame();
+    this.applyRhythmGameStyles();
+}
 
     startRhythmGame() {
-        this.notes = [];
-        this.score = 0;
-        this.rhythmActive = true;
-        
-        const spawnNote = () => {
-            if (!this.rhythmActive) return;
-            
-            const track = document.getElementById('rhythmTrack');
-            const note = document.createElement('div');
-            note.className = 'rhythm-note';
-            note.style.left = Math.random() * 300 + 'px';
-            track.appendChild(note);
-            
-            this.notes.push({
-                element: note,
-                position: 0,
-                active: true
-            });
-            
-            setTimeout(spawnNote, 1000 + Math.random() * 1000);
-        };
-        
-        this.updateRhythmGame();
-        spawnNote();
-        
-        // Terminar el juego después de 30 segundos
-        setTimeout(() => {
-            this.rhythmActive = false;
-            if (this.score >= 10) {
-                this.levelComplete();
-            } else {
-                this.showError('¡Necesitas más puntos! Intenta de nuevo.');
-            }
-        }, 30000);
-    }
-
-    updateRhythmGame() {
+    this.notes = [];
+    this.score = 0;
+    this.rhythmActive = true;
+    // Obtener el tamaño del track
+    const track = document.getElementById('rhythmTrack');
+    const trackHeight = track.clientHeight;
+    const spawnNote = () => {
         if (!this.rhythmActive) return;
-        
-        this.notes.forEach((note, index) => {
-            if (note.active) {
-                note.position += 2;
-                note.element.style.top = note.position + 'px';
-                
-                if (note.position > 400) {
-                    note.element.remove();
-                    note.active = false;
-                }
-            }
+        const note = document.createElement('div');
+        note.className = 'rhythm-note';
+        // Posicionar aleatoriamente en el eje X
+        note.style.left = Math.random() * (track.clientWidth - 40) + 'px';
+        track.appendChild(note);
+        this.notes.push({
+            element: note,
+            position: 0,
+            active: true
         });
-        
-        this.notes = this.notes.filter(note => note.active);
-        
-        requestAnimationFrame(() => this.updateRhythmGame());
-    }
+        setTimeout(spawnNote, 1000 + Math.random() * 1000);
+    };
+    this.updateRhythmGame(trackHeight);
+    spawnNote();
+    // Terminar el juego después de 30 segundos
+    setTimeout(() => {
+        this.rhythmActive = false;
+        if (this.score >= 10) {
+            this.levelComplete();
+        } else {
+            this.showError('¡Necesitas más puntos! Intenta de nuevo.');
+        }
+    }, 30000);
+}
+
+    updateRhythmGame(trackHeight) {
+    if (!this.rhythmActive) return;
+    this.notes.forEach((note, index) => {
+        if (note.active) {
+            note.position += 2;
+            note.element.style.top = note.position + 'px';
+            if (note.position > trackHeight) {
+                note.element.remove();
+                note.active = false;
+            }
+        }
+    });
+    this.notes = this.notes.filter(note => note.active);
+    requestAnimationFrame(() => this.updateRhythmGame(trackHeight));
+}
 
     hitNote(lane) {
         const hitNotes = this.notes.filter(note => {
