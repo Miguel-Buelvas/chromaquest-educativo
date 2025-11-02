@@ -1,277 +1,785 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>ChromaQuest: El Mundo sin Color</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Estilos -->
   <style>
-    /* Estilos generales */
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      width: 100%;
-      height: 100%;
-      font-family: 'Nunito', sans-serif;
-      background: linear-gradient(135deg, #667eea, #764ba2);
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #6e45e2, #88d3ce);
       color: white;
-      overflow: hidden;
+      min-height: 100vh;
+      padding: 20px;
     }
 
-    .game-container {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      position: relative;
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
     }
 
-    .main-menu {
+    /* === MENÚ PRINCIPAL === */
+    #mainMenu {
       text-align: center;
-      animation: fadeInUp 1s ease-out;
+      padding: 40px;
+      animation: fadeIn 1s ease-in-out;
     }
 
     .game-title {
-      font-size: clamp(2.5rem, 7vw, 4rem);
-      font-weight: 800;
-      text-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+      font-size: 3rem;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
 
-    .subtitle {
-      font-size: 1.3rem;
-      margin-bottom: 2rem;
+    .shape {
+      font-size: 4rem;
+      margin: 20px 0;
     }
 
-    .menu-buttons {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-      align-items: center;
-    }
-
-    .menu-btn {
-      background: linear-gradient(45deg, #ff6b6b, #ffa726);
+    .btn {
+      background: #ff6b6b;
       color: white;
       border: none;
-      padding: 1rem 2.5rem;
-      font-size: 1.2rem;
-      border-radius: 40px;
+      padding: 15px 30px;
+      margin: 10px;
+      border-radius: 30px;
       cursor: pointer;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
-      font-family: 'Poppins', sans-serif;
-      min-width: 220px;
+      font-weight: bold;
+      transition: all 0.3s ease;
     }
 
-    .menu-btn.secondary { background: linear-gradient(45deg, #4facfe, #00f2fe); }
-    .menu-btn.settings { background: linear-gradient(45deg, #43e97b, #38f9d7); }
+    .btn:hover {
+      background: #ff8e8e;
+      transform: scale(1.05);
+    }
 
-    .game-level {
+    .settings-panel {
+      background: rgba(255,255,255,0.1);
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+    }
+
+    .setting-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .setting-item label {
+      font-size: 0.9rem;
+    }
+
+    /* === JUEGO === */
+    #gameLevel {
       display: none;
-      width: 100%;
-      height: 100%;
-      padding: 70px 20px 100px;
-      overflow-y: auto;
+      padding: 20px;
     }
 
-    .level-header {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
+    .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      background: rgba(0,0,0,0.2);
-      backdrop-filter: blur(5px);
-      padding: 10px 20px;
-      height: 60px;
-      z-index: 20;
+      margin-bottom: 20px;
+      padding: 10px 0;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
     }
 
-    .level-title {
-      font-size: 1.3rem;
-      font-weight: 700;
+    .level-info {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    #levelTitle {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #fff;
     }
 
     .score-display {
       background: rgba(255,255,255,0.2);
-      padding: 0.4rem 1rem;
+      padding: 8px 15px;
       border-radius: 20px;
-      font-weight: 600;
+      font-weight: bold;
+      font-size: 1.1rem;
     }
 
     .back-btn {
       background: rgba(255,255,255,0.2);
-      border: 2px solid white;
-      padding: 0.4rem 0.9rem;
+      padding: 8px 15px;
       border-radius: 20px;
       cursor: pointer;
-      font-size: 0.95rem;
+      transition: background 0.3s;
     }
 
-    .game-area {
-      max-width: 800px;
-      margin: 0 auto;
-      padding-top: 80px;
+    .back-btn:hover {
+      background: rgba(255,255,255,0.3);
     }
 
-    .color-palette {
+    #gameArea {
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 20px;
+      min-height: 500px;
       display: flex;
-      gap: 0.7rem;
-      background: rgba(255, 255, 255, 0.95);
-      padding: 0.7rem 1rem;
-      border-radius: 40px;
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-      justify-content: center;
-      flex-wrap: wrap;
-      margin: 20px auto;
-      max-width: 600px;
-    }
-
-    .color-dot {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      border: 2px solid white;
-      cursor: pointer;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.2);
-    }
-
-    .color-dot.locked { opacity: 0.4; cursor: not-allowed; }
-
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      background: rgba(0,0,0,0.85);
-      z-index: 1000;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
     }
 
+    /* Estilos genéricos para juegos */
+    .game-section {
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .instructions {
+      background: rgba(255,255,255,0.1);
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .instructions h3 {
+      margin-bottom: 10px;
+      color: #ffcc00;
+    }
+
+    .color-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .color-btn {
+      width: 80px;
+      height: 80px;
+      border-radius: 15px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+
+    .color-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+    }
+
+    .sequence-display {
+      width: 100%;
+      height: 80px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      margin: 20px 0;
+    }
+
+    .sequence-input {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      justify-content: center;
+    }
+
+    .sequence-dot {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      margin: 0 5px;
+    }
+
+    /* Animaciones */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Modales */
+    .victory-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
     .modal-content {
-      background: white;
-      padding: 2rem;
+      background: #fff;
+      color: #333;
+      padding: 30px;
       border-radius: 20px;
       text-align: center;
       max-width: 500px;
-      margin: 1rem;
-      color: #333;
+      animation: modalPop 0.5s ease-out;
     }
 
-    .modal-btn {
-      background: linear-gradient(45deg, #667eea, #764ba2);
+    .modal-content h2 {
+      color: #ff6b6b;
+      margin-bottom: 20px;
+    }
+
+    .modal-content button {
+      background: #ff6b6b;
       color: white;
       border: none;
-      padding: 1rem 2rem;
-      border-radius: 25px;
+      padding: 10px 20px;
+      border-radius: 30px;
       cursor: pointer;
-      font-weight: 600;
+      font-weight: bold;
+      margin-top: 20px;
     }
 
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+    .modal-content button:hover {
+      background: #ff8e8e;
+    }
+
+    @keyframes modalPop {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Para el juego de mezcla */
+    .mixing-game {
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .mixing-instructions {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .color-sources {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .color-source {
+      width: 60px;
+      height: 60px;
+      border-radius: 10px;
+      cursor: grab;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .color-source:active {
+      cursor: grabbing;
+    }
+
+    .mixing-pot {
+      width: 150px;
+      height: 150px;
+      border: 3px dashed #fff;
+      border-radius: 50%;
+      margin: 20px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+      transition: background 0.5s ease;
+      position: relative;
+    }
+
+    .mixing-pot.dragover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .result-display {
+      text-align: center;
+      margin: 20px 0;
+      padding: 10px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+    }
+
+    /* Estilos para otros juegos... puedes agregarlos según necesites */
+
+    /* Error */
+    .error-message {
+      background: #ff4757;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: bold;
+      margin: 20px 0;
+    }
+
+    /* Paleta de colores desbloqueados */
+    #colorPalette {
+      display: flex;
+      gap: 10px;
+      margin: 20px 0;
+      justify-content: center;
+    }
+
+    .color-sample {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 2px solid white;
+    }
+
+    /* Botones de control del laberinto */
+    .maze-controls {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .maze-btn {
+      width: 50px;
+      height: 50px;
+      font-size: 1.5rem;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .maze-btn:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* Para el ritmo */
+    .rhythm-track {
+      width: 100%;
+      height: 400px;
+      position: relative;
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .track-line {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      border-left: 2px solid #fff;
+      border-right: 2px solid #fff;
+    }
+
+    .hit-zone {
+      position: absolute;
+      top: 350px;
+      left: 0;
+      right: 0;
+      height: 50px;
+      background: rgba(255,255,255,0.1);
+      border-top: 2px solid #ffcc00;
+      border-bottom: 2px solid #ffcc00;
+    }
+
+    .rhythm-note {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #ffcc00;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    .rhythm-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .rhythm-btn {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      font-size: 1.5rem;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      cursor: pointer;
+    }
+
+    .rhythm-btn:hover {
+      background: rgba(255,255,255,0.3);
+      transform: scale(1.1);
+    }
+
+    /* Timer */
+    .timer-bar {
+      width: 100%;
+      height: 10px;
+      background: #ffcc00;
+      border-radius: 5px;
+      margin: 10px 0;
+      transition: width 0.5s linear;
+    }
+
+    /* Combinación */
+    .combination-area {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .element-pool {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin: 20px 0;
+    }
+
+    .element {
+      width: 60px;
+      height: 60px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      cursor: grab;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .element:active {
+      cursor: grabbing;
+    }
+
+    .combination-circle {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      border: 3px dashed #fff;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .combination-circle.dragover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    .circle-label {
+      font-size: 1.5rem;
+    }
+
+    .combination-result {
+      text-align: center;
+      margin: 20px 0;
+      padding: 10px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+    }
+
+    /* Visual */
+    .visual-target {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .pattern-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      font-size: 2rem;
+    }
+
+    .pattern-symbol {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px;
+    }
+
+    .visual-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .visual-option {
+      padding: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .visual-option:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* Reflejo */
+    .reflection-target {
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .reflection-row {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      font-size: 2rem;
+    }
+
+    .reflection-cell {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 5px;
+    }
+
+    .reflection-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      justify-content: center;
+      margin-top: 20px;
+    }
+
+    .reflection-option {
+      padding: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .reflection-option:hover {
+      background: rgba(255,255,255,0.2);
+    }
+
+    /* Boss */
+    .boss-stage {
+      width: 100%;
+      max-width: 600px;
+      margin: 20px auto;
+    }
+
+    .boss-feedback {
+      text-align: center;
+      margin: 20px 0;
+      padding: 10px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 10px;
+    }
+
+    /* Botón de retroceso */
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(255,255,255,0.2);
+      padding: 8px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .back-button:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    /* Para pantallas pequeñas */
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .level-info {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .score-display {
+        order: 1;
+      }
+
+      .back-btn {
+        order: 0;
+      }
+
+      .color-grid {
+        grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+      }
+
+      .mixing-pot {
+        width: 120px;
+        height: 120px;
+      }
+
+      .rhythm-track {
+        height: 300px;
+      }
+
+      .rhythm-btn {
+        width: 50px;
+        height: 50px;
+      }
+
+      .combination-circle {
+        width: 80px;
+        height: 80px;
+      }
+
+      .sequence-display {
+        height: 60px;
+        font-size: 1.5rem;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="game-container">
-    <div class="main-menu" id="mainMenu">
+  <div class="container">
+
+    <!-- MENÚ PRINCIPAL -->
+    <div id="mainMenu">
       <h1 class="game-title">ChromaQuest</h1>
-      <p class="subtitle">El Mundo sin Color</p>
-      <div class="menu-buttons">
-        <button class="menu-btn" onclick="startGame()">🎮 Jugar</button>
-        <button class="menu-btn secondary" onclick="showGallery()">🎨 Galería de Colores</button>
-        <button class="menu-btn settings" onclick="showSettings()">⚙️ Ajustes</button>
+      <div class="shape">🧠🎨🧩</div>
+      <p>Un viaje educativo para restaurar el color al mundo.</p>
+      <button class="btn" onclick="startGame()">Jugar</button>
+
+      <div class="settings-panel">
+        <div class="setting-item">
+          <label for="musicVolume">Música:</label>
+          <input type="range" id="musicVolume" min="0" max="100" value="70">
+        </div>
+        <div class="setting-item">
+          <label for="sfxVolume">Efectos:</label>
+          <input type="range" id="sfxVolume" min="0" max="100" value="80">
+        </div>
+        <div class="setting-item">
+          <label for="voiceToggle">Voz:</label>
+          <div class="toggle" id="voiceToggle"></div>
+        </div>
+        <div class="setting-item">
+          <label for="colorblindToggle">Daltonismo:</label>
+          <div class="toggle" id="colorblindToggle"></div>
+        </div>
       </div>
     </div>
 
-    <div class="game-level" id="gameLevel">
-      <div class="level-header">
-        <button class="back-btn" onclick="goBack()">← Volver</button>
-        <h2 class="level-title" id="levelTitle">Nivel 1: El Bosque Gris</h2>
+    <!-- NIVEL DE JUEGO -->
+    <div id="gameLevel">
+      <div class="header">
+        <div class="level-info">
+          <button class="back-btn" onclick="goBackToMenu()">← Volver</button>
+          <h2 id="levelTitle">Nivel 1: El Bosque Gris</h2>
+        </div>
         <div class="score-display" id="scoreDisplay">Puntos: 0</div>
       </div>
 
-      <div class="color-palette" id="colorPalette">
-        <div class="color-dot locked" style="background:#4CAF50" title="Verde"></div>
-        <div class="color-dot locked" style="background:#2196F3" title="Azul"></div>
-        <div class="color-dot locked" style="background:#F44336" title="Rojo"></div>
-        <div class="color-dot locked" style="background:#FF9800" title="Naranja"></div>
-        <div class="color-dot locked" style="background:#9C27B0" title="Morado"></div>
-        <div class="color-dot locked" style="background:#FFEB3B" title="Amarillo"></div>
-        <div class="color-dot locked" style="background:#E91E63" title="Rosa"></div>
-        <div class="color-dot locked" style="background:#00BCD4" title="Turquesa"></div>
-        <div class="color-dot locked" style="background:#FFF" title="Blanco"></div>
+      <div id="gameArea">
+        <!-- Aquí se cargará dinámicamente cada nivel -->
       </div>
 
-      <div class="game-area" id="gameArea"></div>
+      <!-- Paleta de colores desbloqueados -->
+      <div id="colorPalette">
+        <!-- Los colores desbloqueados aparecerán aquí -->
+      </div>
     </div>
+
+    <!-- MODAL DE VICTORIA -->
+    <div id="victoryModal" class="victory-modal" style="display: none;">
+      <div class="modal-content">
+        <h2>🎉 ¡Victoria!</h2>
+        <p>Has restaurado el color al mundo.</p>
+        <button onclick="location.reload()">Jugar de nuevo</button>
+      </div>
+    </div>
+
   </div>
 
-  <div class="modal" id="victoryModal">
-    <div class="modal-content">
-      <h2>¡Brillooo! 🎉</h2>
-      <p>Has restaurado el color y completado el nivel.</p>
-      <button class="modal-btn" onclick="nextLevel()">Siguiente Nivel →</button>
-    </div>
-  </div>
+  <!-- Scripts -->
+  <!-- Opcional: Anime.js para animaciones -->
+  <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script> -->
 
-  <div class="modal" id="welcomeModal">
-    <div class="modal-content">
-      <h2>¡Bienvenido a ChromaQuest! 🎨</h2>
-      <p>Ayuda a Lúa a devolverle el color al mundo mágico.</p>
-      <button class="modal-btn" onclick="closeWelcomeModal()">¡Comenzar Aventura!</button>
-    </div>
-  </div>
-
-  <script src="game.js" defer></script>
+  <!-- Tu código JavaScript -->
   <script>
-    function showGallery() {
-      alert('🎨 Aquí verás todos los colores que has restaurado. ¡Completa los niveles para desbloquear más!');
-    }
+    // ======== COPIA AQUÍ TU CLASE ChromaQuest CORREGIDA =========
+    // (El código que te envié antes, desde "class ChromaQuest { ... }")
+    // ======== FIN DE LA CLASE ========
+    
+    // Instancia global del juego
+    let game;
 
-    function showSettings() {
-      alert('⚙️ Ajustes próximamente disponibles.');
-    }
-
-    function closeWelcomeModal() {
-      document.getElementById('welcomeModal').style.display = 'none';
-    }
-
+    // Funciones globales para el HTML
     function startGame() {
-      document.getElementById('mainMenu').style.display = 'none';
-      document.getElementById('gameLevel').style.display = 'block';
-      if (typeof game !== 'undefined') {
-        game.startGame();
+      if (!game) {
+        game = new ChromaQuest();
+      }
+      game.startGame();
+    }
+
+    function goBackToMenu() {
+      const mainMenu = document.getElementById('mainMenu');
+      const gameLevel = document.getElementById('gameLevel');
+      if (mainMenu) mainMenu.style.display = 'block';
+      if (gameLevel) gameLevel.style.display = 'none';
+      // Reiniciar juego si es necesario
+      if (game) {
+        game.currentLevel = 1;
+        game.score = 0;
+        game.unlockedColors = [];
+        // Puedes agregar más lógica de reinicio si lo necesitas
       }
     }
 
-    function goBack() {
-      document.getElementById('gameLevel').style.display = 'none';
-      document.getElementById('mainMenu').style.display = 'block';
-    }
-
-    function nextLevel() {
-      document.getElementById('victoryModal').style.display = 'none';
-      if (typeof game !== 'undefined') {
-        game.nextLevel();
-      }
-    }
-
-    window.onload = () => {
-      document.getElementById('welcomeModal').style.display = 'flex';
-    };
+    // Inicializar cuando el DOM esté listo
+    document.addEventListener('DOMContentLoaded', () => {
+      // Si quieres que el juego inicie automáticamente, descomenta la siguiente línea
+      // startGame();
+    });
   </script>
 
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('sw.js').catch(console.warn);
-    }
-  </script>
-
-  <script src="game.js" defer></script>
 </body>
 </html>
