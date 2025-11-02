@@ -1,4 +1,4 @@
-// ChromaQuest: El Mundo sin Color - Versión completa con 10 niveles
+// ChromaQuest: El Mundo sin Color - Versión completa con 10 niveles (CORREGIDA)
 class ChromaQuest {
   constructor() {
     this.currentLevel = 1;
@@ -51,8 +51,8 @@ class ChromaQuest {
     const ct = document.getElementById('colorblindToggle');
     if (mv) mv.value = this.gameSettings.musicVolume;
     if (sv) sv.value = this.gameSettings.sfxVolume;
-    if (vt) vt.classList.toggle('active', this.gameSettings.voiceEnabled);
-    if (ct) ct.classList.toggle('active', this.gameSettings.colorblindMode);
+    if (vt) vt?.classList.toggle('active', this.gameSettings.voiceEnabled);
+    if (ct) ct?.classList.toggle('active', this.gameSettings.colorblindMode);
   }
 
   setupEventListeners() {
@@ -66,7 +66,6 @@ class ChromaQuest {
       this.gameSettings.sfxVolume = e.target.value;
       this.saveSettings();
     });
-
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         this.closeAllModals();
@@ -96,6 +95,7 @@ class ChromaQuest {
       });
     }
   }
+
   startGame() {
     const mainMenu = document.getElementById('mainMenu');
     const gameLevel = document.getElementById('gameLevel');
@@ -111,152 +111,111 @@ class ChromaQuest {
     const gameArea = document.getElementById('gameArea');
     if (!gameArea) return;
     gameArea.innerHTML = '';
-
     switch (level.mechanic) {
-      case 'memory':
-        this.createMemoryGame(gameArea);
-        break;
-      case 'mixing':
-        this.createMixingGame(gameArea);
-        break;
-      case 'maze':
-        this.createMazeGame(gameArea);
-        break;
-      case 'shape':
-        this.createShapeGame(gameArea);
-        break;
-      case 'rhythm':
-        this.createRhythmGame(gameArea);
-        break;
-      case 'combination':
-        this.createCombinationGame(gameArea);
-        break;
-      case 'visual':
-        this.createVisualGame(gameArea);
-        break;
-      case 'timed':
-        this.createTimedGame(gameArea);
-        break;
-      case 'reflection':
-        this.createReflectionGame(gameArea);
-        break;
-      case 'boss':
-        this.createBossGame(gameArea);
-        break;
-      case 'logic':
-        this.createLogicGame(gameArea);
-        break;
-      case 'sequence':
-        this.createSequenceGame(gameArea);
-        break;
-      case 'sound':
-        this.createSoundGame(gameArea);
-        break;
-      case 'reaction':
-        this.createReactionGame(gameArea);
-        break;
-      case 'strategy':
-        this.createStrategyGame(gameArea);
-        break;
+      case 'memory': this.createMemoryGame(gameArea); break;
+      case 'mixing': this.createMixingGame(gameArea); break;
+      case 'maze': this.createMazeGame(gameArea); break;
+      case 'shape': this.createShapeGame(gameArea); break;
+      case 'rhythm': this.createRhythmGame(gameArea); break;
+      case 'combination': this.createCombinationGame(gameArea); break;
+      case 'visual': this.createVisualGame(gameArea); break;
+      case 'timed': this.createTimedGame(gameArea); break;
+      case 'reflection': this.createReflectionGame(gameArea); break;
+      case 'boss': this.createBossGame(gameArea); break;
       default:
         this.showError('Nivel no implementado aún.');
     }
-
     this.playSound('levelStart');
     this.showInstructions(level.mechanic);
   }
-  createMemoryGame(container) {
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
-    const sequence = this.generateSequence(3 + this.currentLevel);
-    let playerSequence = [];
+
+  // === F U N C I O N E S  F A L T A N T E S  (implementadas aquí) ===
+
+  playSound(soundName) {
+    // Aquí puedes integrar Web Audio API o simplemente simular con console.log
+    // Para un MVP funcional, no rompe si no existe.
+    if (typeof console !== 'undefined') {
+      // console.log(`[Sound]: ${soundName}`);
+    }
+  }
+
+  showError(message) {
+    const gameArea = document.getElementById('gameArea');
+    if (gameArea) {
+      gameArea.innerHTML = `<div class="error-message" style="color: red; padding: 20px; font-weight: bold;">${message}</div>`;
+    }
+  }
+
+  showInstructions(mechanic) {
+    // Opcional: ya está incluido en cada createXGame()
+  }
+
+  closeAllModals() {
+    // Cierra cualquier modal activo (puedes personalizar según tu HTML)
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(m => m.style.display = 'none');
+  }
+
+  updateColorPalette() {
+    // Ejemplo mínimo: actualiza un elemento visual con colores desbloqueados
+    const palette = document.getElementById('colorPalette');
+    if (palette) {
+      palette.innerHTML = this.unlockedColors.map(c => `<div class="color-sample" style="background: ${c === 'rainbow' ? 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)' : c}"></div>`).join('');
+    }
+  }
+
+  // === C O R R E C C I Ó N  C R Í T I C A: Nivel de Mezcla ===
+
+  createMixingGame(container) {
+    const colorMixtureCombinations = {
+      orange: ['red', 'yellow'],
+      green: ['blue', 'yellow'],
+      purple: ['red', 'blue']
+    };
+    const colorHex = {
+      red: '#FF0000',
+      blue: '#0000FF',
+      yellow: '#FFFF00',
+      orange: '#FFA500',
+      green: '#008000',
+      purple: '#800080'
+    };
+
+    const targetColor = this.levels[this.currentLevel - 1].color; // e.g., "orange"
     const gameUI = document.createElement('div');
-    gameUI.className = 'memory-game';
+    gameUI.className = 'mixing-game';
     gameUI.innerHTML = `
-      <div class="memory-instructions">
-        <h3>🧠 Memoriza la secuencia de colores</h3>
-        <p>Observa con atención el orden de los colores</p>
+      <div class="mixing-instructions">
+        <h3>🎨 Mezcla dos colores</h3>
+        <p>Crea el color: <strong>${this.getColorName(targetColor)}</strong></p>
       </div>
-      <div class="sequence-display" id="sequenceDisplay"></div>
-      <div class="color-grid" id="colorGrid"></div>
-      <div class="sequence-input" id="sequenceInput"></div>
+      <div class="color-sources" id="colorSources"></div>
+      <div class="mixing-pot" id="mixingPot" data-target="${targetColor}">
+        <div id="potText">Arrastra DOS colores aquí</div>
+      </div>
+      <div class="result-display" id="resultDisplay"></div>
     `;
     container.appendChild(gameUI);
 
-    this.showSequence(sequence, colors);
-
-    const colorGrid = document.getElementById('colorGrid');
-    colors.forEach((color, index) => {
-      const btn = document.createElement('button');
-      btn.className = 'color-btn';
-      btn.style.backgroundColor = color;
-      btn.setAttribute('aria-label', `Color ${index + 1}`);
-      btn.onclick = () => this.addToSequence(color, playerSequence, sequence);
-      colorGrid.appendChild(btn);
+    // Crear fuentes de color PRIMARIOS + el objetivo si es primario
+    const availableColors = ['red', 'blue', 'yellow'];
+    const sources = document.getElementById('colorSources');
+    availableColors.forEach(color => {
+      const el = document.createElement('div');
+      el.className = 'color-source';
+      el.style.backgroundColor = colorHex[color];
+      el.setAttribute('data-color', color);
+      el.setAttribute('draggable', 'true');
+      el.title = this.getColorName(color);
+      sources.appendChild(el);
     });
 
-    this.applyMemoryGameStyles();
+    // Iniciar lógica de mezcla
+    this.setupMixingGame(colorMixtureCombinations, colorHex);
   }
 
-  showSequence(sequence, colors) {
-    const display = document.getElementById('sequenceDisplay');
-    if (!display) return;
-    let i = 0;
+  // === M É T O D O S  E X I S T E N T E S  (sin cambios, excepto uso correcto) ===
 
-    const showNext = () => {
-      if (i < sequence.length) {
-        display.style.backgroundColor = colors[sequence[i]];
-        display.textContent = `Color ${i + 1}`;
-        this.playSound('beep');
-        setTimeout(() => {
-          display.style.backgroundColor = 'transparent';
-          display.textContent = '';
-          i++;
-          setTimeout(showNext, 300);
-        }, 1000);
-      } else {
-        display.innerHTML = '<h3>¡Ahora tú! Repite la secuencia</h3>';
-      }
-    };
-
-    showNext();
-  }
-
-  addToSequence(color, playerSequence, correctSequence) {
-    playerSequence.push(color);
-    this.playSound('click');
-    const input = document.getElementById('sequenceInput');
-    if (input) {
-      const dot = document.createElement('div');
-      dot.className = 'sequence-dot';
-      dot.style.backgroundColor = color;
-      input.appendChild(dot);
-    }
-
-    if (playerSequence.length === correctSequence.length) {
-      setTimeout(() => {
-        this.checkSequence(playerSequence, correctSequence);
-      }, 500);
-    }
-  }
-
-  checkSequence(playerSequence, correctSequence) {
-    const palette = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
-    const correctColors = correctSequence.map(i => palette[i]);
-    const isCorrect = playerSequence.every((color, i) => color === correctColors[i]);
-
-    if (isCorrect) {
-      this.levelComplete();
-    } else {
-      this.showError('Secuencia incorrecta. ¡Inténtalo de nuevo!');
-      setTimeout(() => {
-        this.loadLevel(this.currentLevel);
-      }, 2000);
-    }
-  }
-
-  generateSequence(length) {
-    return Array.from({ length }, () => Math.floor(Math.random() * 6));
-  }
   setupMixingGame(colorMixtureCombinations, colorHex) {
     const pot = document.getElementById('mixingPot');
     const sources = document.querySelectorAll('.color-source');
@@ -274,9 +233,7 @@ class ChromaQuest {
     sources.forEach(source => {
       source.addEventListener('dragstart', (e) => {
         e.dataTransfer.setData('color', e.target.dataset.color);
-        e.dataTransfer.setData('hex', e.target.dataset.hex || '');
       });
-
       source.addEventListener('click', (e) => {
         const col = e.currentTarget.dataset.color;
         if (!mixedColors.includes(col)) {
@@ -295,16 +252,13 @@ class ChromaQuest {
     });
 
     if (!pot) return;
-
     pot.addEventListener('dragover', (e) => {
       e.preventDefault();
       pot.classList.add('dragover');
     });
-
     pot.addEventListener('dragleave', () => {
       pot.classList.remove('dragover');
     });
-
     pot.addEventListener('drop', (e) => {
       e.preventDefault();
       pot.classList.remove('dragover');
@@ -358,8 +312,8 @@ class ChromaQuest {
       if (potText) potText.textContent = `Has agregado ${this.getColorName(colors[0])}`;
       if (display) display.innerHTML = `<p>Colores mezclados: 1/2</p>`;
     } else if (colors.length === 2) {
-      const hex0 = colorHex[colors[0]] || colors[0];
-      const hex1 = colorHex[colors[1]] || colors[1];
+      const hex0 = colorHex[colors[0]];
+      const hex1 = colorHex[colors[1]];
       const gradient = `linear-gradient(45deg, ${hex0}, ${hex1})`;
       pot.style.background = gradient;
       pot.classList.add('mixed');
@@ -378,7 +332,11 @@ class ChromaQuest {
     const targetColor = pot ? pot.dataset.target : null;
     const display = document.getElementById('resultDisplay');
     const requiredColors = colorMixtureCombinations[targetColor] || [];
-    const correctMixture = requiredColors.every(color => colors.includes(color)) && colors.length === 2;
+
+    const correctMixture = requiredColors.length === 2 &&
+      colors.includes(requiredColors[0]) &&
+      colors.includes(requiredColors[1]) &&
+      colors.length === 2;
 
     if (correctMixture) {
       this.playSound('success');
@@ -405,19 +363,102 @@ class ChromaQuest {
 
   getColorName(color) {
     const colorNames = {
-      'green': 'Verde',
-      'orange': 'Naranja',
-      'purple': 'Morado',
-      'red': 'Rojo',
-      'blue': 'Azul',
-      'yellow': 'Amarillo',
-      'pink': 'Rosa',
-      'turquoise': 'Turquesa',
-      'white': 'Blanco',
+      'green': 'Verde', 'orange': 'Naranja', 'purple': 'Morado',
+      'red': 'Rojo', 'blue': 'Azul', 'yellow': 'Amarillo',
+      'pink': 'Rosa', 'turquoise': 'Turquesa', 'white': 'Blanco',
       'rainbow': 'Arcoíris'
     };
     return colorNames[color] || color;
   }
+
+  // === R E S T O  D E  L O S  M É T O D O S  (sin cambios, ya estaban bien) ===
+
+  createMemoryGame(container) {
+    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+    const sequence = this.generateSequence(3 + this.currentLevel);
+    let playerSequence = [];
+    const gameUI = document.createElement('div');
+    gameUI.className = 'memory-game';
+    gameUI.innerHTML = `
+      <div class="memory-instructions">
+        <h3>🧠 Memoriza la secuencia de colores</h3>
+        <p>Observa con atención el orden de los colores</p>
+      </div>
+      <div class="sequence-display" id="sequenceDisplay"></div>
+      <div class="color-grid" id="colorGrid"></div>
+      <div class="sequence-input" id="sequenceInput"></div>
+    `;
+    container.appendChild(gameUI);
+    this.showSequence(sequence, colors);
+    const colorGrid = document.getElementById('colorGrid');
+    colors.forEach((color, index) => {
+      const btn = document.createElement('button');
+      btn.className = 'color-btn';
+      btn.style.backgroundColor = color;
+      btn.setAttribute('aria-label', `Color ${index + 1}`);
+      btn.onclick = () => this.addToSequence(color, playerSequence, sequence);
+      colorGrid.appendChild(btn);
+    });
+    this.applyMemoryGameStyles();
+  }
+
+  showSequence(sequence, colors) {
+    const display = document.getElementById('sequenceDisplay');
+    if (!display) return;
+    let i = 0;
+    const showNext = () => {
+      if (i < sequence.length) {
+        display.style.backgroundColor = colors[sequence[i]];
+        display.textContent = `Color ${i + 1}`;
+        this.playSound('beep');
+        setTimeout(() => {
+          display.style.backgroundColor = 'transparent';
+          display.textContent = '';
+          i++;
+          setTimeout(showNext, 300);
+        }, 1000);
+      } else {
+        display.innerHTML = '<h3>¡Ahora tú! Repite la secuencia</h3>';
+      }
+    };
+    showNext();
+  }
+
+  addToSequence(color, playerSequence, correctSequence) {
+    playerSequence.push(color);
+    this.playSound('click');
+    const input = document.getElementById('sequenceInput');
+    if (input) {
+      const dot = document.createElement('div');
+      dot.className = 'sequence-dot';
+      dot.style.backgroundColor = color;
+      input.appendChild(dot);
+    }
+    if (playerSequence.length === correctSequence.length) {
+      setTimeout(() => {
+        this.checkSequence(playerSequence, correctSequence);
+      }, 500);
+    }
+  }
+
+  checkSequence(playerSequence, correctSequence) {
+    const palette = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+    const correctColors = correctSequence.map(i => palette[i]);
+    const isCorrect = playerSequence.every((color, i) => color === correctColors[i]);
+    if (isCorrect) {
+      this.levelComplete();
+    } else {
+      this.showError('Secuencia incorrecta. ¡Inténtalo de nuevo!');
+      setTimeout(() => {
+        this.loadLevel(this.currentLevel);
+      }, 2000);
+    }
+  }
+
+  generateSequence(length) {
+    return Array.from({ length }, () => Math.floor(Math.random() * 6));
+  }
+
   createMazeGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'maze-game';
@@ -454,11 +495,9 @@ class ChromaQuest {
       [1,0,0,0,0,0,0,1],
       [1,1,1,1,1,1,1,1]
     ];
-
     const grid = document.getElementById('mazeGrid');
     if (!grid) return;
     grid.innerHTML = '';
-
     for (let y = 0; y < maze.length; y++) {
       for (let x = 0; x < maze[y].length; x++) {
         const cell = document.createElement('div');
@@ -477,7 +516,6 @@ class ChromaQuest {
         grid.appendChild(cell);
       }
     }
-
     this.mazeData = maze;
     this.playerPos = { x: 1, y: 1 };
     this.updatePlayerPosition();
@@ -487,19 +525,16 @@ class ChromaQuest {
     const { x, y } = this.playerPos;
     let newX = x;
     let newY = y;
-
     switch (direction) {
       case 'up': newY--; break;
       case 'down': newY++; break;
       case 'left': newX--; break;
       case 'right': newX++; break;
     }
-
     if (this.mazeData[newY] && this.mazeData[newY][newX] === 0) {
       this.playerPos = { x: newX, y: newY };
       this.updatePlayerPosition();
       this.playSound('move');
-
       if (newX === 6 && newY === 5) {
         setTimeout(() => {
           this.levelComplete();
@@ -517,6 +552,7 @@ class ChromaQuest {
     player.style.left = (this.playerPos.x * cellSize) + 'px';
     player.style.top = (this.playerPos.y * cellSize) + 'px';
   }
+
   createShapeGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'shape-game';
@@ -540,7 +576,6 @@ class ChromaQuest {
       { shape: '⭐', colors: ['yellow', 'red', 'blue'] },
       { shape: '🔷', colors: ['blue', 'green', 'orange'] }
     ];
-
     const correctPattern = patterns[Math.floor(Math.random() * patterns.length)];
     const target = document.getElementById('targetPattern');
     if (target) {
@@ -553,11 +588,9 @@ class ChromaQuest {
         </div>
       `;
     }
-
     const options = document.getElementById('shapeOptions');
     if (!options) return;
     const shuffledPatterns = [...patterns].sort(() => Math.random() - 0.5);
-
     shuffledPatterns.forEach(pattern => {
       const option = document.createElement('div');
       option.className = 'shape-option';
@@ -581,6 +614,7 @@ class ChromaQuest {
       options.appendChild(option);
     });
   }
+
   createRhythmGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'rhythm-game';
@@ -609,7 +643,6 @@ class ChromaQuest {
     this.notes = [];
     this.score = 0;
     this.rhythmActive = true;
-
     const spawnNote = () => {
       if (!this.rhythmActive) return;
       const track = document.getElementById('rhythmTrack');
@@ -625,10 +658,8 @@ class ChromaQuest {
       });
       setTimeout(spawnNote, 1000 + Math.random() * 1000);
     };
-
     this.updateRhythmGame();
     spawnNote();
-
     setTimeout(() => {
       this.rhythmActive = false;
       if (this.score >= 10) {
@@ -660,7 +691,6 @@ class ChromaQuest {
       const noteLane = Math.round(parseInt(note.element.style.left || '0', 10) / 75);
       return Math.abs(noteLane - lane) < 1 && note.position > 350 && note.position < 400;
     });
-
     if (hitNotes.length > 0) {
       const note = hitNotes[0];
       note.element.remove();
@@ -683,6 +713,7 @@ class ChromaQuest {
       effect.remove();
     }, 500);
   }
+
   createCombinationGame(container) {
     const combinations = [
       { elements: ['☀️', '💧'], result: '🌈', color: 'yellow' },
@@ -690,9 +721,7 @@ class ChromaQuest {
       { elements: ['🌙', '⭐'], result: '✨', color: 'white' },
       { elements: ['💧', '❄️'], result: '💎', color: 'turquoise' }
     ];
-
     const combo = combinations[Math.floor(Math.random() * combinations.length)];
-
     const gameUI = document.createElement('div');
     gameUI.className = 'combination-game';
     gameUI.innerHTML = `
@@ -709,7 +738,6 @@ class ChromaQuest {
       </div>
     `;
     container.appendChild(gameUI);
-
     this.setupCombinationGame(combo);
     this.applyCombinationGameStyles();
   }
@@ -719,10 +747,8 @@ class ChromaQuest {
     const circle = document.getElementById('combinationCircle');
     const result = document.getElementById('combinationResult');
     let selected = [];
-
     const allElements = ['☀️', '💧', '🔥', '🌿', '🌙', '⭐', '❄️'];
     const shuffled = [...new Set([...combo.elements, ...allElements])].sort(() => Math.random() - 0.5);
-
     shuffled.forEach(symbol => {
       const el = document.createElement('div');
       el.className = 'element';
@@ -745,16 +771,13 @@ class ChromaQuest {
       });
       pool.appendChild(el);
     });
-
     circle.addEventListener('dragover', (e) => {
       e.preventDefault();
       circle.classList.add('dragover');
     });
-
     circle.addEventListener('dragleave', () => {
       circle.classList.remove('dragover');
     });
-
     circle.addEventListener('drop', (e) => {
       e.preventDefault();
       circle.classList.remove('dragover');
@@ -770,7 +793,6 @@ class ChromaQuest {
         }
       }
     });
-
     this.resetCombination = () => {
       selected = [];
       this.updateCombinationCircle([]);
@@ -788,7 +810,6 @@ class ChromaQuest {
   checkCombination(symbols, combo) {
     const result = document.getElementById('combinationResult');
     const correct = combo.elements.every(el => symbols.includes(el)) && symbols.length === 2;
-
     if (correct) {
       this.playSound('success');
       if (result) result.innerHTML = `<p>¡Has creado ${combo.result}! El color <strong>${this.getColorName(combo.color)}</strong> ha sido restaurado.</p>`;
@@ -803,6 +824,7 @@ class ChromaQuest {
       }, 1200);
     }
   }
+
   createVisualGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'visual-game';
@@ -826,7 +848,6 @@ class ChromaQuest {
       ['🔵', '🟡', '🔴', '🟢'],
       ['🟢', '🔴', '🔵', '🟡']
     ];
-
     const correctPattern = patterns[Math.floor(Math.random() * patterns.length)];
     const target = document.getElementById('visualTarget');
     if (target) {
@@ -836,11 +857,9 @@ class ChromaQuest {
         </div>
       `;
     }
-
     const options = document.getElementById('visualOptions');
     if (!options) return;
     const shuffled = [...patterns].sort(() => Math.random() - 0.5);
-
     shuffled.forEach(pattern => {
       const option = document.createElement('div');
       option.className = 'visual-option';
@@ -862,6 +881,7 @@ class ChromaQuest {
       options.appendChild(option);
     });
   }
+
   createTimedGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'timed-game';
@@ -887,11 +907,9 @@ class ChromaQuest {
     const timerBar = document.getElementById('timerBar');
     let playerSequence = [];
     let timeLeft = 10;
-
     if (sequenceEl) {
       sequenceEl.innerHTML = sequence.map(c => `<span class="timed-symbol">${c}</span>`).join('');
     }
-
     if (gridEl) {
       colors.forEach(color => {
         const btn = document.createElement('button');
@@ -907,7 +925,6 @@ class ChromaQuest {
         gridEl.appendChild(btn);
       });
     }
-
     const countdown = setInterval(() => {
       timeLeft--;
       if (timerBar) {
@@ -932,6 +949,7 @@ class ChromaQuest {
       setTimeout(() => this.loadLevel(this.currentLevel), 1500);
     }
   }
+
   createReflectionGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'reflection-game';
@@ -955,7 +973,6 @@ class ChromaQuest {
       ['⬛', '⬛', '⬜'],
       ['⬜', '⬛', '⬛']
     ];
-
     const original = figures[Math.floor(Math.random() * figures.length)];
     const correct = [...original].reverse();
     const distractors = [
@@ -964,9 +981,7 @@ class ChromaQuest {
       ['⬜', '⬜', '⬛'],
       ['⬛', '⬛', '⬛']
     ].filter(p => p.join('') !== correct.join(''));
-
     const options = [correct, ...distractors].sort(() => Math.random() - 0.5);
-
     const target = document.getElementById('reflectionTarget');
     if (target) {
       target.innerHTML = `
@@ -975,10 +990,8 @@ class ChromaQuest {
         </div>
       `;
     }
-
     const container = document.getElementById('reflectionOptions');
     if (!container) return;
-
     options.forEach(pattern => {
       const option = document.createElement('div');
       option.className = 'reflection-option';
@@ -1000,6 +1013,7 @@ class ChromaQuest {
       container.appendChild(option);
     });
   }
+
   createBossGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'boss-game';
@@ -1027,16 +1041,14 @@ class ChromaQuest {
     const stage = document.getElementById('bossStage');
     const feedback = document.getElementById('bossFeedback');
     if (!stage || !feedback) return;
-
     stage.innerHTML = '';
     feedback.innerHTML = `<p>Etapa: ${this.getMechanicName(mechanic)}</p>`;
-
     switch (mechanic) {
       case 'memory':
         this.createMemoryGame(stage);
         break;
       case 'mixing':
-        this.createMixingGame(stage);
+        this.createMixingGame(stage); // ✅ Ahora funciona porque createMixingGame define sus propios datos
         break;
       case 'shape':
         this.createShapeGame(stage);
@@ -1079,6 +1091,9 @@ class ChromaQuest {
     };
     return names[mechanic] || mechanic;
   }
+
+  // === MÉTODOS ADICIONALES (no usados en niveles 1-10, pero completos) ===
+
   createLogicGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'logic-game';
@@ -1113,14 +1128,11 @@ class ChromaQuest {
         answer: 0
       }
     ];
-
     const puzzle = puzzles[Math.floor(Math.random() * puzzles.length)];
     const questionEl = document.getElementById('logicQuestion');
     const optionsEl = document.getElementById('logicOptions');
-
     if (questionEl) questionEl.textContent = puzzle.question;
     if (!optionsEl) return;
-
     puzzle.options.forEach((opt, i) => {
       const btn = document.createElement('button');
       btn.className = 'logic-btn';
@@ -1137,6 +1149,7 @@ class ChromaQuest {
       optionsEl.appendChild(btn);
     });
   }
+
   createSequenceGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'sequence-game';
@@ -1161,18 +1174,14 @@ class ChromaQuest {
       { sequence: [2, 4, 6, 8], next: 10 },
       { sequence: ['⬛', '⬜', '⬛'], next: '⬜' }
     ];
-
     const puzzle = patterns[Math.floor(Math.random() * patterns.length)];
     const patternEl = document.getElementById('sequencePattern');
     const optionsEl = document.getElementById('sequenceOptions');
-
     if (patternEl) {
       patternEl.innerHTML = puzzle.sequence.map(el => `<span class="sequence-item">${el}</span>`).join('');
     }
-
     const distractors = [puzzle.next, '❌', '💥', '0', 'Z', '🟥', '🟣', '⬛', '⬜'].filter(el => el !== puzzle.next);
     const choices = [puzzle.next, ...distractors.sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5);
-
     if (!optionsEl) return;
     choices.forEach(choice => {
       const btn = document.createElement('button');
@@ -1190,6 +1199,7 @@ class ChromaQuest {
       optionsEl.appendChild(btn);
     });
   }
+
   createSoundGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'sound-game';
@@ -1212,10 +1222,7 @@ class ChromaQuest {
     const playerSequence = [];
     const controls = document.getElementById('soundControls');
     const feedback = document.getElementById('soundFeedback');
-
     if (!controls) return;
-
-    // Mostrar botones de sonido
     sounds.forEach((sound, index) => {
       const btn = document.createElement('button');
       btn.className = 'sound-btn';
@@ -1231,8 +1238,6 @@ class ChromaQuest {
       };
       controls.appendChild(btn);
     });
-
-    // Reproducir secuencia al inicio
     let i = 0;
     const playNext = () => {
       if (i < sequence.length) {
@@ -1257,6 +1262,7 @@ class ChromaQuest {
       setTimeout(() => this.loadLevel(this.currentLevel), 1500);
     }
   }
+
   createReactionGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'reaction-game';
@@ -1279,16 +1285,13 @@ class ChromaQuest {
     const symbols = ['🌟', '💥', '⚡', '🔥', '🎯'];
     const target = '⚡';
     let clicked = false;
-
     if (!zone || !feedback) return;
-
     zone.innerHTML = `<p>Prepárate...</p>`;
     setTimeout(() => {
       const symbol = symbols[Math.floor(Math.random() * symbols.length)];
       zone.innerHTML = `<button class="reaction-symbol">${symbol}</button>`;
       const btn = zone.querySelector('.reaction-symbol');
       const startTime = performance.now();
-
       btn.onclick = () => {
         if (clicked) return;
         clicked = true;
@@ -1306,7 +1309,7 @@ class ChromaQuest {
     }, 2000 + Math.random() * 2000);
   }
 
-    createStrategyGame(container) {
+  createStrategyGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'strategy-game';
     gameUI.innerHTML = `
@@ -1328,10 +1331,8 @@ class ChromaQuest {
     const feedback = document.getElementById('strategyFeedback');
     this.strategyVisited = [];
     this.strategyPath = [];
-
     if (!grid || !feedback) return;
     grid.innerHTML = '';
-
     for (let y = 0; y < gridSize; y++) {
       for (let x = 0; x < gridSize; x++) {
         const cell = document.createElement('div');
@@ -1343,7 +1344,6 @@ class ChromaQuest {
         grid.appendChild(cell);
       }
     }
-
     feedback.innerHTML = `<p>Selecciona los nodos estratégicamente</p>`;
   }
 
@@ -1354,14 +1354,11 @@ class ChromaQuest {
       this.showError('¡Ya pasaste por ese nodo!');
       return;
     }
-
     this.strategyVisited.push(key);
     this.strategyPath.push({ x, y });
     this.playSound('click');
-
     const grid = document.getElementById('strategyGrid');
     if (!grid) return;
-
     const cells = grid.querySelectorAll('.strategy-cell');
     cells.forEach(cell => {
       if (cell.dataset.x == x && cell.dataset.y == y) {
@@ -1369,7 +1366,6 @@ class ChromaQuest {
         cell.classList.add('visited');
       }
     });
-
     if (this.strategyVisited.length === 16) {
       this.playSound('success');
       const feedback = document.getElementById('strategyFeedback');
@@ -1378,3 +1374,37 @@ class ChromaQuest {
     }
   }
 
+  // === Métodos auxiliares adicionales ===
+
+  showVictoryModal() {
+    const modal = document.createElement('div');
+    modal.className = 'victory-modal';
+    modal.innerHTML = `
+      <div class="modal-content">
+        <h2>🎉 ¡Victoria!</h2>
+        <p>Has restaurado el color al mundo.</p>
+        <button onclick="location.reload()">Jugar de nuevo</button>
+      </div>
+    `;
+    document.body.appendChild(modal);
+  }
+
+  saveProgress() {
+    // Aquí podrías guardar el progreso del jugador
+  }
+
+  applyMemoryGameStyles() { /* Estilos en CSS */ }
+  applyMazeGameStyles() { /* Estilos en CSS */ }
+  applyShapeGameStyles() { /* Estilos en CSS */ }
+  applyRhythmGameStyles() { /* Estilos en CSS */ }
+  applyCombinationGameStyles() { /* Estilos en CSS */ }
+  applyVisualGameStyles() { /* Estilos en CSS */ }
+  applyTimedGameStyles() { /* Estilos en CSS */ }
+  applyReflectionGameStyles() { /* Estilos en CSS */ }
+  applyBossGameStyles() { /* Estilos en CSS */ }
+  applyLogicGameStyles() { /* Estilos en CSS */ }
+  applySequenceGameStyles() { /* Estilos en CSS */ }
+  applySoundGameStyles() { /* Estilos en CSS */ }
+  applyReactionGameStyles() { /* Estilos en CSS */ }
+  applyStrategyGameStyles() { /* Estilos en CSS */ }
+}
