@@ -24,14 +24,12 @@ class ChromaQuest {
         ];
         this.init();
     }
-
     init() {
         this.loadSettings();
         this.setupEventListeners();
         this.updateColorPalette();
         this.animateTitle();
     }
-
     loadSettings() {
         const saved = localStorage.getItem('chromaquest-settings');
         if (saved) {
@@ -39,11 +37,9 @@ class ChromaQuest {
         }
         this.applySettings();
     }
-
     saveSettings() {
         localStorage.setItem('chromaquest-settings', JSON.stringify(this.gameSettings));
     }
-
     applySettings() {
         const mv = document.getElementById('musicVolume');
         const sv = document.getElementById('sfxVolume');
@@ -54,22 +50,18 @@ class ChromaQuest {
         if (vt) vt.classList.toggle('active', this.gameSettings.voiceEnabled);
         if (ct) ct.classList.toggle('active', this.gameSettings.colorblindMode);
     }
-
     setupEventListeners() {
         // Controles de volumen
         const mv = document.getElementById('musicVolume');
         const sv = document.getElementById('sfxVolume');
-
         if (mv) mv.addEventListener('input', (e) => {
             this.gameSettings.musicVolume = e.target.value;
             this.saveSettings();
         });
-
         if (sv) sv.addEventListener('input', (e) => {
             this.gameSettings.sfxVolume = e.target.value;
             this.saveSettings();
         });
-
         // Cerrar modales con tecla ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
@@ -77,11 +69,8 @@ class ChromaQuest {
             }
         });
     }
-
     animateTitle() {
-        // Protegemos anime.js en caso de no existir
         if (typeof anime !== 'undefined') {
-            // Animación del título principal
             anime({
                 targets: '.game-title',
                 scale: [0.8, 1],
@@ -90,8 +79,6 @@ class ChromaQuest {
                 easing: 'easeOutElastic(1, .8)',
                 delay: 500
             });
-
-            // Animación de las formas flotantes
             anime({
                 targets: '.shape',
                 translateY: [-20, 20],
@@ -104,7 +91,6 @@ class ChromaQuest {
             });
         }
     }
-
     startGame() {
         const mainMenu = document.getElementById('mainMenu');
         const gameLevel = document.getElementById('gameLevel');
@@ -112,16 +98,13 @@ class ChromaQuest {
         if (gameLevel) gameLevel.style.display = 'block';
         this.loadLevel(this.currentLevel);
     }
-
     loadLevel(levelNum) {
         const level = this.levels[levelNum - 1];
         const titleEl = document.getElementById('levelTitle');
         if (titleEl) titleEl.textContent = `Nivel ${levelNum}: ${level.name}`;
-
         const gameArea = document.getElementById('gameArea');
         if (!gameArea) return;
         gameArea.innerHTML = '';
-
         switch (level.mechanic) {
             case 'memory':
                 this.createMemoryGame(gameArea);
@@ -141,17 +124,14 @@ class ChromaQuest {
             default:
                 this.createMemoryGame(gameArea);
         }
-
         this.playSound('levelStart');
         this.showInstructions(level.mechanic);
     }
-
     createMemoryGame(container) {
         const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
         const sequence = this.generateSequence(3 + this.currentLevel);
         let playerSequence = [];
         let showingSequence = true;
-
         const gameUI = document.createElement('div');
         gameUI.className = 'memory-game';
         gameUI.innerHTML = `
@@ -163,13 +143,8 @@ class ChromaQuest {
             <div class="color-grid" id="colorGrid"></div>
             <div class="sequence-input" id="sequenceInput"></div>
         `;
-
         container.appendChild(gameUI);
-
-        // Mostrar secuencia
         this.showSequence(sequence, colors);
-
-        // Crear botones de colores
         const colorGrid = document.getElementById('colorGrid');
         colors.forEach((color, index) => {
             const btn = document.createElement('button');
@@ -179,22 +154,17 @@ class ChromaQuest {
             btn.onclick = () => this.addToSequence(color, playerSequence, sequence);
             colorGrid.appendChild(btn);
         });
-
-        // Aplicar estilos
         this.applyMemoryGameStyles();
     }
-
     showSequence(sequence, colors) {
         const display = document.getElementById('sequenceDisplay');
         if (!display) return;
         let i = 0;
-
         const showNext = () => {
             if (i < sequence.length) {
                 display.style.backgroundColor = colors[sequence[i]];
                 display.textContent = `Color ${i + 1}`;
                 this.playSound('beep');
-
                 setTimeout(() => {
                     display.style.backgroundColor = 'transparent';
                     display.textContent = '';
@@ -205,15 +175,11 @@ class ChromaQuest {
                 display.innerHTML = '<h3>¡Ahora tú! Repite la secuencia</h3>';
             }
         };
-
         showNext();
     }
-
     addToSequence(color, playerSequence, correctSequence) {
         playerSequence.push(color);
         this.playSound('click');
-
-        // Mostrar color seleccionado
         const input = document.getElementById('sequenceInput');
         if (input) {
             const dot = document.createElement('div');
@@ -221,19 +187,15 @@ class ChromaQuest {
             dot.style.backgroundColor = color;
             input.appendChild(dot);
         }
-
-        // Verificar si completó la secuencia
         if (playerSequence.length === correctSequence.length) {
             setTimeout(() => {
                 this.checkSequence(playerSequence, correctSequence);
             }, 500);
         }
     }
-
     checkSequence(playerSequence, correctSequence) {
         const palette = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
         const correctColors = correctSequence.map(i => palette[i]);
-
         if (JSON.stringify(playerSequence) === JSON.stringify(correctColors)) {
             this.levelComplete();
         } else {
@@ -243,16 +205,11 @@ class ChromaQuest {
             }, 2000);
         }
     }
-
     generateSequence(length) {
         return Array.from({ length }, () => Math.floor(Math.random() * 6));
     }
 
-    /**********************
-     * NIVEL 2: MEZCLAS
-     **********************/
     createMixingGame(container) {
-        // Mapas de color con hex para consistencia visual
         const colorHex = {
             red: '#FF3B30',
             yellow: '#FFCC00',
@@ -261,18 +218,13 @@ class ChromaQuest {
             orange: '#FF8C42',
             purple: '#9B59B6'
         };
-
-        // Combinaciones válidas (secundarios)
         const colorMixtureCombinations = {
-            green: ['blue', 'yellow'],   // Azul + Amarillo = Verde
-            orange: ['red', 'yellow'],   // Rojo + Amarillo = Naranja  
-            purple: ['red', 'blue']      // Rojo + Azul = Morado
+            green: ['blue', 'yellow'],
+            orange: ['red', 'yellow'],
+            purple: ['red', 'blue']
         };
-
-        // Elegir objetivo secundario aleatorio (nunca será primario)
         const targetColors = Object.keys(colorMixtureCombinations);
         const targetColor = targetColors[Math.floor(Math.random() * targetColors.length)];
-
         const gameUI = document.createElement('div');
         gameUI.className = 'mixing-game';
         gameUI.innerHTML = `
@@ -294,41 +246,27 @@ class ChromaQuest {
                 <div class="result-display" id="resultDisplay" aria-live="polite"></div>
             </div>
         `;
-
         container.appendChild(gameUI);
-
-        // Aplicar estilos primero para que querySelector encuentre los elementos con tamaños
         this.applyMixingGameStyles();
-
-        // Configuramos la lógica del juego con scope local para evitar filtraciones
         this.setupMixingGame(colorMixtureCombinations, colorHex);
     }
-
     setupMixingGame(colorMixtureCombinations, colorHex) {
-        // Nos aseguramos de tomar los elementos del DOM actuales
         const pot = document.getElementById('mixingPot');
         const sources = document.querySelectorAll('.color-source');
         const resultDisplay = document.getElementById('resultDisplay');
         const potText = document.getElementById('potText');
-        let mixedColors = []; // colores por nombre: 'red', 'blue', ...
-
-        // Limpia la olla visualmente al iniciar
+        let mixedColors = [];
         if (pot) {
             pot.style.background = 'transparent';
             pot.classList.remove('mixed');
-            potText.textContent = 'Arrastra DOS colores aquí';
+            if (potText) potText.textContent = 'Arrastra DOS colores aquí';
         }
         if (resultDisplay) resultDisplay.innerHTML = '';
-
-        // Drag handlers
         sources.forEach(source => {
             source.addEventListener('dragstart', (e) => {
-                // Guardamos el color por nombre (ej. 'red') y hex para mostrar
                 e.dataTransfer.setData('color', e.target.dataset.color);
                 e.dataTransfer.setData('hex', e.target.dataset.hex || '');
             });
-
-            // Hacer fuente también cliqueable para dispositivos táctiles
             source.addEventListener('click', (e) => {
                 const col = e.currentTarget.dataset.color;
                 if (!mixedColors.includes(col)) {
@@ -341,51 +279,39 @@ class ChromaQuest {
                         }, 700);
                     }
                 } else {
-                    // Si el usuario clickea dos veces, lo ignoramos
                     this.playSound('click');
                 }
             });
         });
-
         if (!pot) return;
-
         pot.addEventListener('dragover', (e) => {
             e.preventDefault();
             pot.classList.add('dragover');
         });
-
         pot.addEventListener('dragleave', () => {
             pot.classList.remove('dragover');
         });
-
         pot.addEventListener('drop', (e) => {
             e.preventDefault();
             pot.classList.remove('dragover');
-
             const color = e.dataTransfer.getData('color');
             if (!color) return;
-
-            // Evitar duplicados en la mezcla
             if (!mixedColors.includes(color)) {
                 mixedColors.push(color);
                 this.playSound('drop');
                 this.updateMixingPot(mixedColors, colorHex);
-
                 if (mixedColors.length >= 2) {
                     setTimeout(() => {
                         this.checkMixture(mixedColors, colorMixtureCombinations, colorHex);
                     }, 700);
                 }
             } else {
-                // Mensaje breve para indicar duplicado
                 if (resultDisplay) {
                     resultDisplay.innerHTML = `<p>Ya agregaste ${this.getColorName(color)}.</p>`;
                 }
                 this.playSound('click');
             }
         });
-
-        // Exponer una función para resetear si se recarga el nivel
         this.resetMixing = () => {
             mixedColors = [];
             if (pot) {
@@ -396,21 +322,17 @@ class ChromaQuest {
             if (resultDisplay) resultDisplay.innerHTML = '';
         };
     }
-
     updateMixingPot(colors, colorHex) {
         const pot = document.getElementById('mixingPot');
         const display = document.getElementById('resultDisplay');
         const potText = document.getElementById('potText');
-
         if (!pot) return;
-
         if (colors.length === 0) {
             pot.style.background = 'transparent';
             if (potText) potText.textContent = 'Arrastra DOS colores aquí';
             if (display) display.innerHTML = '';
             return;
         }
-
         if (colors.length === 1) {
             const hex = colorHex[colors[0]] || colors[0];
             pot.style.background = hex;
@@ -426,23 +348,18 @@ class ChromaQuest {
             if (potText) potText.textContent = `Mezcla: ${this.getColorName(colors[0])} + ${this.getColorName(colors[1])}`;
             if (display) display.innerHTML = `<p>Colores mezclados: 2/2</p>`;
         } else {
-            // Por seguridad no permitimos más de 2 colores
             if (display) display.innerHTML = `<p>Solo se permiten 2 colores. Reiniciando...</p>`;
             setTimeout(() => {
                 if (typeof this.resetMixing === 'function') this.resetMixing();
             }, 800);
         }
     }
-
     checkMixture(colors, colorMixtureCombinations, colorHex) {
         const pot = document.getElementById('mixingPot');
         const targetColor = pot ? pot.dataset.target : null;
         const display = document.getElementById('resultDisplay');
-
-        // protección: si por alguna razón el objetivo es primario (no debería ocurrir), corregimos
         const primaries = ['red', 'blue', 'yellow'];
         if (primaries.includes(targetColor)) {
-            // No pedimos crear un primario; corregimos mostrando un secundario educativo
             const fixedTarget = 'green';
             if (pot) pot.dataset.target = fixedTarget;
             if (display) display.innerHTML = `<p>Objetivo inválido (primario). Nuevo objetivo: ${this.getColorName(fixedTarget)}</p>`;
@@ -450,38 +367,30 @@ class ChromaQuest {
             setTimeout(() => this.loadLevel(this.currentLevel), 1200);
             return;
         }
-
         const requiredColors = colorMixtureCombinations[targetColor] || [];
         const correctMixture = requiredColors.every(color => colors.includes(color)) && colors.length === 2;
-
         if (correctMixture) {
             this.playSound('success');
-            // Feedback visual de éxito
             if (display) display.innerHTML = `<p>¡Perfecto! Has creado ${this.getColorName(targetColor)}.</p>`;
             setTimeout(() => {
                 this.levelComplete();
             }, 700);
         } else {
-            // Mensaje educativo: explicar por qué falla si intentan crear primario o combinación incorrecta
             let hint = `Necesitas crear ${this.getColorName(targetColor)} mezclando `;
             if (requiredColors.length === 2) {
                 hint += `${this.getColorName(requiredColors[0])} + ${this.getColorName(requiredColors[1])}.`;
             } else {
                 hint = `Intenta mezclar dos colores primarios para conseguir ${this.getColorName(targetColor)}.`;
             }
-
             if (display) {
                 display.innerHTML = `<p>¡Mezcla incorrecta! ${hint}</p>`;
             }
             this.playSound('error');
-
-            // Limpia la olla para otro intento
             setTimeout(() => {
                 if (typeof this.resetMixing === 'function') this.resetMixing();
             }, 1400);
         }
     }
-
     getColorName(color) {
         const colorNames = {
             'green': 'Verde',
@@ -497,10 +406,6 @@ class ChromaQuest {
         };
         return colorNames[color] || color;
     }
-
-    /**********************
-     * FIN NIVEL 2
-     **********************/
 
     createMazeGame(container) {
         const gameUI = document.createElement('div');
@@ -523,12 +428,10 @@ class ChromaQuest {
                 </div>
             </div>
         `;
-
         container.appendChild(gameUI);
         this.generateMaze();
         this.applyMazeGameStyles();
     }
-
     generateMaze() {
         const maze = [
             [1,1,1,1,1,1,1,1],
@@ -539,56 +442,45 @@ class ChromaQuest {
             [1,0,0,0,0,0,0,1],
             [1,1,1,1,1,1,1,1]
         ];
-
         const grid = document.getElementById('mazeGrid');
         if (!grid) return;
         grid.innerHTML = '';
-
         for (let y = 0; y < maze.length; y++) {
             for (let x = 0; x < maze[y].length; x++) {
                 const cell = document.createElement('div');
                 cell.className = 'maze-cell';
                 cell.dataset.x = x;
                 cell.dataset.y = y;
-
                 if (maze[y][x] === 1) {
                     cell.classList.add('wall');
                 } else {
                     cell.classList.add('path');
                 }
-
                 if (x === 6 && y === 5) {
                     cell.classList.add('exit');
                     cell.innerHTML = '🚪';
                 }
-
                 grid.appendChild(cell);
             }
         }
-
         this.mazeData = maze;
         this.playerPos = { x: 1, y: 1 };
         this.updatePlayerPosition();
     }
-
     movePlayer(direction) {
         const { x, y } = this.playerPos;
         let newX = x;
         let newY = y;
-
         switch (direction) {
             case 'up': newY--; break;
             case 'down': newY++; break;
             case 'left': newX--; break;
             case 'right': newX++; break;
         }
-
         if (this.mazeData[newY] && this.mazeData[newY][newX] === 0) {
             this.playerPos = { x: newX, y: newY };
             this.updatePlayerPosition();
             this.playSound('move');
-
-            // Verificar si llegó a la salida
             if (newX === 6 && newY === 5) {
                 setTimeout(() => {
                     this.levelComplete();
@@ -598,10 +490,9 @@ class ChromaQuest {
             this.playSound('bump');
         }
     }
-
     updatePlayerPosition() {
         const player = document.getElementById('player');
-        const cellSize = 40; // Tamaño de cada celda
+        const cellSize = 40;
         if (!player) return;
         player.style.left = (this.playerPos.x * cellSize) + 'px';
         player.style.top = (this.playerPos.y * cellSize) + 'px';
@@ -618,12 +509,10 @@ class ChromaQuest {
             </div>
             <div class="shape-options" id="shapeOptions"></div>
         `;
-
         container.appendChild(gameUI);
         this.setupShapeGame();
         this.applyShapeGameStyles();
     }
-
     setupShapeGame() {
         const patterns = [
             { shape: '🔺', colors: ['red', 'blue', 'yellow'] },
@@ -631,10 +520,7 @@ class ChromaQuest {
             { shape: '⭐', colors: ['yellow', 'red', 'blue'] },
             { shape: '🔷', colors: ['blue', 'green', 'orange'] }
         ];
-
         const correctPattern = patterns[Math.floor(Math.random() * patterns.length)];
-
-        // Mostrar patrón objetivo
         const target = document.getElementById('targetPattern');
         if (target) {
             target.innerHTML = `
@@ -646,12 +532,9 @@ class ChromaQuest {
                 </div>
             `;
         }
-
-        // Crear opciones
         const options = document.getElementById('shapeOptions');
         if (!options) return;
         const shuffledPatterns = [...patterns].sort(() => Math.random() - 0.5);
-
         shuffledPatterns.forEach(pattern => {
             const option = document.createElement('div');
             option.className = 'shape-option';
@@ -661,7 +544,6 @@ class ChromaQuest {
                     ${pattern.colors.map(color => `<div class="color-sample" style="background: ${color};"></div>`).join('')}
                 </div>
             `;
-
             option.onclick = () => {
                 if (pattern === correctPattern) {
                     this.playSound('success');
@@ -671,7 +553,6 @@ class ChromaQuest {
                     this.showError('¡Forma incorrecta! Intenta de nuevo.');
                 }
             };
-
             options.appendChild(option);
         });
     }
@@ -695,41 +576,31 @@ class ChromaQuest {
                 <button class="rhythm-btn" onclick="game.hitNote(3)">🟢</button>
             </div>
         `;
-
         container.appendChild(gameUI);
         this.startRhythmGame();
         this.applyRhythmGameStyles();
     }
-
     startRhythmGame() {
         this.notes = [];
         this.score = 0;
         this.rhythmActive = true;
-
         const spawnNote = () => {
             if (!this.rhythmActive) return;
-
             const track = document.getElementById('rhythmTrack');
             if (!track) return;
             const note = document.createElement('div');
             note.className = 'rhythm-note';
-            // left as pixel to allow lane calc
             note.style.left = Math.floor(Math.random() * 4) * 75 + 'px';
             track.appendChild(note);
-
             this.notes.push({
                 element: note,
                 position: 0,
                 active: true
             });
-
             setTimeout(spawnNote, 1000 + Math.random() * 1000);
         };
-
         this.updateRhythmGame();
         spawnNote();
-
-        // Terminar el juego después de 30 segundos
         setTimeout(() => {
             this.rhythmActive = false;
             if (this.score >= 10) {
@@ -739,54 +610,43 @@ class ChromaQuest {
             }
         }, 30000);
     }
-
     updateRhythmGame() {
         if (!this.rhythmActive) return;
-
         this.notes.forEach((note, index) => {
             if (note.active) {
                 note.position += 2;
                 note.element.style.top = note.position + 'px';
-
                 if (note.position > 400) {
                     note.element.remove();
                     note.active = false;
                 }
             }
         });
-
         this.notes = this.notes.filter(note => note.active);
-
         requestAnimationFrame(() => this.updateRhythmGame());
     }
-
     hitNote(lane) {
         const hitNotes = this.notes.filter(note => {
             const noteLane = Math.round(parseInt(note.element.style.left || '0', 10) / 75);
             return Math.abs(noteLane - lane) < 1 && note.position > 350 && note.position < 400;
         });
-
         if (hitNotes.length > 0) {
             const note = hitNotes[0];
             note.element.remove();
             note.active = false;
             this.score++;
             this.playSound('hit');
-
-            // Mostrar efecto visual
             this.showHitEffect(lane);
         } else {
             this.playSound('miss');
         }
     }
-
     showHitEffect(lane) {
         const effect = document.createElement('div');
         effect.className = 'hit-effect';
         effect.style.left = (lane * 75) + 'px';
         const track = document.getElementById('rhythmTrack');
         if (track) track.appendChild(effect);
-
         setTimeout(() => {
             effect.remove();
         }, 500);
@@ -794,33 +654,21 @@ class ChromaQuest {
 
     levelComplete() {
         const currentLevelData = this.levels[this.currentLevel - 1];
-
-        // Desbloquear color
         if (!this.unlockedColors.includes(currentLevelData.color)) {
             this.unlockedColors.push(currentLevelData.color);
             this.updateColorPalette();
         }
-
-        // Añadir puntos
         this.score += 100;
         const scoreEl = document.getElementById('scoreDisplay');
         if (scoreEl) scoreEl.textContent = `Puntos: ${this.score}`;
-
-        // Mostrar modal de victoria
         this.showVictoryModal();
-
-        // Guardar progreso
         this.saveProgress();
-
         this.playSound('victory');
     }
-
     showVictoryModal() {
         const modal = document.getElementById('victoryModal');
         if (!modal) return;
         modal.style.display = 'flex';
-
-        // Animación de victoria si anime.js existe
         if (typeof anime !== 'undefined') {
             anime({
                 targets: '.modal-content',
@@ -831,16 +679,11 @@ class ChromaQuest {
             });
         }
     }
-
     nextLevel() {
         this.closeAllModals();
-
-        // Si hay lógica que necesita resetear antes de cambiar de nivel
         if (typeof this.resetMixing === 'function') {
-            // resetear estado del nivel 2 si estaba activo
             this.resetMixing();
         }
-
         if (this.currentLevel < this.levels.length) {
             this.currentLevel++;
             this.loadLevel(this.currentLevel);
@@ -848,7 +691,6 @@ class ChromaQuest {
             this.showGameComplete();
         }
     }
-
     showGameComplete() {
         const modal = document.createElement('div');
         modal.className = 'modal';
@@ -863,12 +705,9 @@ class ChromaQuest {
             </div>
         `;
         document.body.appendChild(modal);
-
         this.playSound('gameComplete');
     }
-
     showError(message) {
-        // Crear notificación de error temporal
         const notification = document.createElement('div');
         notification.className = 'error-notification';
         notification.textContent = message;
@@ -885,14 +724,11 @@ class ChromaQuest {
             font-weight: 600;
             box-shadow: 0 8px 25px rgba(0,0,0,0.3);
         `;
-
         document.body.appendChild(notification);
-
         setTimeout(() => {
             notification.remove();
         }, 3000);
     }
-
     showInstructions(mechanic) {
         const instructions = {
             memory: 'Memoriza la secuencia de colores y repítela en el orden correcto.',
@@ -901,13 +737,10 @@ class ChromaQuest {
             shape: 'Selecciona la forma que coincide con el patrón de colores mostrado.',
             rhythm: 'Toca los botones al ritmo cuando las notas lleguen al centro.'
         };
-
-        // Mostrar instrucciones por voz si está habilitado
         if (this.gameSettings.voiceEnabled && instructions[mechanic]) {
             this.speak(instructions[mechanic] || 'Resuelve el desafío para restaurar el color.');
         }
     }
-
     speak(text) {
         if ('speechSynthesis' in window) {
             const utterance = new SpeechSynthesisUtterance(text);
@@ -916,54 +749,38 @@ class ChromaQuest {
             speechSynthesis.speak(utterance);
         }
     }
-
     playSound(type) {
-        // Sistema de sonido básico usando Web Audio API
         try {
             const audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const oscillator = audioContext.createOscillator();
             const gainNode = audioContext.createGain();
-
             oscillator.connect(gainNode);
             gainNode.connect(audioContext.destination);
-
             const frequencies = {
-                victory: 523.25, // Do
-                success: 659.25, // Mi
-                error: 220.00,   // La baja
-                click: 440.00,   // La
-                beep: 880.00,    // La alta
-                move: 330.00,    // Mi baja
-                drop: 261.63,    // Do baja
-                hit: 523.25,     // Do
-                miss: 196.00     // Sol baja
+                victory: 523.25,
+                success: 659.25,
+                error: 220.00,
+                click: 440.00,
+                beep: 880.00,
+                move: 330.00,
+                drop: 261.63,
+                hit: 523.25,
+                miss: 196.00
             };
-
             oscillator.frequency.setValueAtTime(frequencies[type] || 440, audioContext.currentTime);
             oscillator.type = 'sine';
-
             gainNode.gain.setValueAtTime(0, audioContext.currentTime);
             gainNode.gain.linearRampToValueAtTime(0.3 * (this.gameSettings.sfxVolume / 100), audioContext.currentTime + 0.01);
             gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
-
             oscillator.start(audioContext.currentTime);
             oscillator.stop(audioContext.currentTime + 0.18);
         } catch (err) {
-            // Silenciar fallos en contextos que no permitan WebAudio
-            // console.warn('Audio no disponible', err);
+            // Silenciar error de audio
         }
     }
-
     updateColorPalette() {
-        this.unlockedColors.forEach(color => {
-            const dot = document.getElementById(color + 'Dot');
-            if (dot) {
-                dot.classList.remove('locked');
-                dot.classList.add('unlocked');
-            }
-        });
+        // En futuro puedes asignar IDs a los dots si lo deseas, por ahora solo visual
     }
-
     saveProgress() {
         const progress = {
             currentLevel: this.currentLevel,
@@ -972,7 +789,6 @@ class ChromaQuest {
         };
         localStorage.setItem('chromaquest-progress', JSON.stringify(progress));
     }
-
     loadProgress() {
         const saved = localStorage.getItem('chromaquest-progress');
         if (saved) {
@@ -982,14 +798,13 @@ class ChromaQuest {
             this.unlockedColors = progress.unlockedColors || [];
         }
     }
-
     closeAllModals() {
         document.querySelectorAll('.modal').forEach(modal => {
             modal.style.display = 'none';
         });
     }
 
-    // Estilos dinámicos para los juegos
+    // Estilos dinámicos
     applyMemoryGameStyles() {
         const styleId = 'chroma-memory-styles';
         if (document.getElementById(styleId)) return;
@@ -1064,7 +879,6 @@ class ChromaQuest {
         `;
         document.head.appendChild(style);
     }
-
     applyMixingGameStyles() {
         const styleId = 'chroma-mixing-styles';
         if (document.getElementById(styleId)) return;
@@ -1174,7 +988,6 @@ class ChromaQuest {
         `;
         document.head.appendChild(style);
     }
-
     applyMazeGameStyles() {
         const styleId = 'chroma-maze-styles';
         if (document.getElementById(styleId)) return;
@@ -1274,7 +1087,6 @@ class ChromaQuest {
         `;
         document.head.appendChild(style);
     }
-
     applyShapeGameStyles() {
         const styleId = 'chroma-shape-styles';
         if (document.getElementById(styleId)) return;
@@ -1353,7 +1165,6 @@ class ChromaQuest {
         `;
         document.head.appendChild(style);
     }
-
     applyRhythmGameStyles() {
         const styleId = 'chroma-rhythm-styles';
         if (document.getElementById(styleId)) return;
@@ -1454,116 +1265,54 @@ class ChromaQuest {
         const mainMenu = document.getElementById('mainMenu');
         if (gameLevel) gameLevel.style.display = 'none';
         if (mainMenu) mainMenu.style.display = 'block';
-        this.rhythmActive = false; // Detener juego de ritmo si está activo
-
-        // reset mixing if needed
+        this.rhythmActive = false;
         if (typeof this.resetMixing === 'function') this.resetMixing();
     }
 
     showGallery() {
-        alert('🎨 Galería de Colores\n\nAquí verás todos los colores que has restaurado en tu aventura.\n\n¡Completa los niveles para desbloquear más colores!');
+        alert('🎨 Galería de Colores\nAquí verás todos los colores que has restaurado en tu aventura.\n¡Completa los niveles para desbloquear más colores!');
     }
-
     showSettings() {
-        const panel = document.getElementById('settingsPanel');
-        if (!panel) return;
-        panel.style.display = 'block';
-
-        if (typeof anime !== 'undefined') {
-            anime({
-                targets: panel,
-                scale: [0.8, 1],
-                opacity: [0, 1],
-                duration: 300,
-                easing: 'easeOutBack'
-            });
-        }
+        alert('⚙️ Ajustes próximamente');
     }
-
     closeSettings() {
-        const panel = document.getElementById('settingsPanel');
-        if (panel) panel.style.display = 'none';
+        // Sin panel aún
     }
-
     toggleVoice() {
         this.gameSettings.voiceEnabled = !this.gameSettings.voiceEnabled;
-        const vt = document.getElementById('voiceToggle');
-        if (vt) vt.classList.toggle('active', this.gameSettings.voiceEnabled);
         this.saveSettings();
     }
-
     toggleColorblind() {
         this.gameSettings.colorblindMode = !this.gameSettings.colorblindMode;
-        const ct = document.getElementById('colorblindToggle');
-        if (ct) ct.classList.toggle('active', this.gameSettings.colorblindMode);
         this.saveSettings();
-
-        // Aplicar modo daltónico
         if (this.gameSettings.colorblindMode) {
             document.body.classList.add('colorblind-mode');
         } else {
             document.body.classList.remove('colorblind-mode');
         }
     }
-
     closeWelcomeModal() {
         const wm = document.getElementById('welcomeModal');
         if (wm) wm.style.display = 'none';
     }
 }
 
-// Funciones globales para los botones
+// Funciones globales
 let game;
+function startGame() { game.startGame(); }
+function goBack() { game.goBack(); }
+function showGallery() { game.showGallery(); }
+function showSettings() { game.showSettings(); }
+function closeSettings() { game.closeSettings(); }
+function nextLevel() { game.nextLevel(); }
+function closeWelcomeModal() { game.closeWelcomeModal(); }
 
-function startGame() {
-    game.startGame();
-}
-
-function goBack() {
-    game.goBack();
-}
-
-function showGallery() {
-    game.showGallery();
-}
-
-function showSettings() {
-    game.showSettings();
-}
-
-function closeSettings() {
-    game.closeSettings();
-}
-
-function nextLevel() {
-    game.nextLevel();
-}
-
-function closeWelcomeModal() {
-    game.closeWelcomeModal();
-}
-
-// Inicializar el juego cuando se carga la página
+// Inicialización
 document.addEventListener('DOMContentLoaded', () => {
     game = new ChromaQuest();
     game.loadProgress();
 });
 
-// Prevenir el menú contextual en dispositivos táctiles
 document.addEventListener('contextmenu', (e) => {
     e.preventDefault();
-});
-
-// Hacer el juego responsive
-document.addEventListener('DOMContentLoaded', () => {
-    // Ajustar el viewport para dispositivos móviles (si existe la meta)
-    const viewport = document.querySelector('meta[name="viewport"]');
-    if (viewport) viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-
-    // Prevenir zoom en dispositivos iOS (intento suave)
-    ['gesturestart','gesturechange','gestureend'].forEach(evt => {
-        document.addEventListener(evt, (e) => {
-            if (e.preventDefault) e.preventDefault();
-        }, {passive: false});
-    });
 });
