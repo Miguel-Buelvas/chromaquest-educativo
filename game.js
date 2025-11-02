@@ -166,106 +166,92 @@ class ChromaQuest {
 
   // === C O R R E C C I Ó N  C R Í T I C A: Nivel de Mezcla ===
 
-  createMixingGame(container) {
-    const colorMixtureCombinations = {
-      orange: ['red', 'yellow'],
-      green: ['blue', 'yellow'],
-      purple: ['red', 'blue']
-    };
-    const colorHex = {
-      red: '#FF0000',
-      blue: '#0000FF',
-      yellow: '#FFFF00',
-      orange: '#FFA500',
-      green: '#008000',
-      purple: '#800080'
-    };
+  // Reemplaza createMixingGame, setupMixingGame, updateMixingPot y checkMixture
+createMixingGame(container) {
+  const colorMixtureCombinations = {
+    orange: ['red', 'yellow'],
+    green: ['blue', 'yellow'],
+    purple: ['red', 'blue']
+  };
+  const colorHex = {
+    red: '#FF0000',
+    blue: '#0000FF',
+    yellow: '#FFFF00',
+    orange: '#FFA500',
+    green: '#008000',
+    purple: '#800080'
+  };
 
-    const targetColor = this.levels[this.currentLevel - 1].color; // e.g., "orange"
-    const gameUI = document.createElement('div');
-    gameUI.className = 'mixing-game';
-    gameUI.innerHTML = `
-      <div class="mixing-instructions">
-        <h3>🎨 Mezcla dos colores</h3>
-        <p>Crea el color: <strong>${this.getColorName(targetColor)}</strong></p>
-      </div>
-      <div class="color-sources" id="colorSources"></div>
-      <div class="mixing-pot" id="mixingPot" data-target="${targetColor}">
-        <div id="potText">Arrastra DOS colores aquí</div>
-      </div>
-      <div class="result-display" id="resultDisplay"></div>
-    `;
-    container.appendChild(gameUI);
+  const targetColor = this.levels[this.currentLevel - 1].color; // e.g., "blue"
+  const isPrimary = ['red','blue','yellow'].includes(targetColor);
 
-    // Crear fuentes de color PRIMARIOS + el objetivo si es primario
-    const availableColors = ['red', 'blue', 'yellow'];
-    const sources = document.getElementById('colorSources');
-    availableColors.forEach(color => {
-      const el = document.createElement('div');
-      el.className = 'color-source';
-      el.style.backgroundColor = colorHex[color];
-      el.setAttribute('data-color', color);
-      el.setAttribute('draggable', 'true');
-      el.title = this.getColorName(color);
-      sources.appendChild(el);
-    });
+  const gameUI = document.createElement('div');
+  gameUI.className = 'mixing-game';
+  gameUI.innerHTML = `
+    <div class="mixing-instructions">
+      <h3>🎨 ${isPrimary ? 'Selecciona el color' : 'Mezcla dos colores'}</h3>
+      <p>${isPrimary ? `Consigue el color: <strong>${this.getColorName(targetColor)}</strong>` 
+                      : `Crea el color: <strong>${this.getColorName(targetColor)}</strong>`}</p>
+    </div>
+    <div class="color-sources" id="colorSources"></div>
+    <div class="mixing-pot" id="mixingPot" data-target="${targetColor}" data-mode="${isPrimary ? 'primary' : 'mix'}">
+      <div id="potText">${isPrimary ? 'Haz clic o arrastra el color correcto' : 'Arrastra DOS colores aquí'}</div>
+    </div>
+    <div class="result-display" id="resultDisplay"></div>
+  `;
+  container.appendChild(gameUI);
 
-    // Iniciar lógica de mezcla
-    this.setupMixingGame(colorMixtureCombinations, colorHex);
+  // Crear fuentes de color PRIMARIOS
+  const availableColors = ['red', 'blue', 'yellow'];
+  const sources = document.getElementById('colorSources');
+  availableColors.forEach(color => {
+    const el = document.createElement('div');
+    el.className = 'color-source';
+    el.style.backgroundColor = colorHex[color];
+    el.setAttribute('data-color', color);
+    el.setAttribute('draggable', 'true');
+    el.title = this.getColorName(color);
+    sources.appendChild(el);
+  });
+
+  // Iniciar lógica de mezcla (pasa las combinaciones y hex)
+  this.setupMixingGame(colorMixtureCombinations, colorHex);
+},
+
+setupMixingGame(colorMixtureCombinations, colorHex) {
+  const pot = document.getElementById('mixingPot');
+  const sources = document.querySelectorAll('.color-source');
+  const resultDisplay = document.getElementById('resultDisplay');
+  const potText = document.getElementById('potText');
+  let mixedColors = [];
+
+  if (pot) {
+    pot.style.background = 'transparent';
+    pot.classList.remove('mixed');
+    if (potText) potText.textContent = pot.dataset.mode === 'primary' 
+      ? 'Haz clic o arrastra el color correcto' 
+      : 'Arrastra DOS colores aquí';
   }
+  if (resultDisplay) resultDisplay.innerHTML = '';
 
-  // === M É T O D O S  E X I S T E N T E S  (sin cambios, excepto uso correcto) ===
-
-  setupMixingGame(colorMixtureCombinations, colorHex) {
-    const pot = document.getElementById('mixingPot');
-    const sources = document.querySelectorAll('.color-source');
-    const resultDisplay = document.getElementById('resultDisplay');
-    const potText = document.getElementById('potText');
-    let mixedColors = [];
-
-    if (pot) {
-      pot.style.background = 'transparent';
-      pot.classList.remove('mixed');
-      if (potText) potText.textContent = 'Arrastra DOS colores aquí';
-    }
-    if (resultDisplay) resultDisplay.innerHTML = '';
-
-    sources.forEach(source => {
-      source.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('color', e.target.dataset.color);
-      });
-      source.addEventListener('click', (e) => {
-        const col = e.currentTarget.dataset.color;
-        if (!mixedColors.includes(col)) {
-          mixedColors.push(col);
-          this.playSound('drop');
-          this.updateMixingPot(mixedColors, colorHex);
-          if (mixedColors.length >= 2) {
-            setTimeout(() => {
-              this.checkMixture(mixedColors, colorMixtureCombinations, colorHex);
-            }, 700);
-          }
-        } else {
-          this.playSound('click');
-        }
-      });
+  sources.forEach(source => {
+    source.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('color', e.target.dataset.color);
     });
+    source.addEventListener('click', (e) => {
+      const col = e.currentTarget.dataset.color;
+      // Si es modo primary, se acepta solo 1 color y se valida de inmediato
+      if (pot && pot.dataset.mode === 'primary') {
+        this.playSound('drop');
+        this.updateMixingPot([col], colorHex);
+        setTimeout(() => {
+          this.checkMixture([col], colorMixtureCombinations, colorHex);
+        }, 300);
+        return;
+      }
 
-    if (!pot) return;
-    pot.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      pot.classList.add('dragover');
-    });
-    pot.addEventListener('dragleave', () => {
-      pot.classList.remove('dragover');
-    });
-    pot.addEventListener('drop', (e) => {
-      e.preventDefault();
-      pot.classList.remove('dragover');
-      const color = e.dataTransfer.getData('color');
-      if (!color) return;
-      if (!mixedColors.includes(color)) {
-        mixedColors.push(color);
+      if (!mixedColors.includes(col)) {
+        mixedColors.push(col);
         this.playSound('drop');
         this.updateMixingPot(mixedColors, colorHex);
         if (mixedColors.length >= 2) {
@@ -274,92 +260,163 @@ class ChromaQuest {
           }, 700);
         }
       } else {
-        if (resultDisplay) {
-          resultDisplay.innerHTML = `<p>Ya agregaste ${this.getColorName(color)}.</p>`;
-        }
         this.playSound('click');
       }
     });
+  });
 
-    this.resetMixing = () => {
-      mixedColors = [];
-      if (pot) {
-        pot.style.background = 'transparent';
-        pot.classList.remove('mixed');
-        if (potText) potText.textContent = 'Arrastra DOS colores aquí';
-      }
-      if (resultDisplay) resultDisplay.innerHTML = '';
-    };
-  }
+  if (!pot) return;
+  pot.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    pot.classList.add('dragover');
+  });
+  pot.addEventListener('dragleave', () => {
+    pot.classList.remove('dragover');
+  });
+  pot.addEventListener('drop', (e) => {
+    e.preventDefault();
+    pot.classList.remove('dragover');
+    const color = e.dataTransfer.getData('color');
+    if (!color) return;
 
-  updateMixingPot(colors, colorHex) {
-    const pot = document.getElementById('mixingPot');
-    const display = document.getElementById('resultDisplay');
-    const potText = document.getElementById('potText');
-    if (!pot) return;
-
-    if (colors.length === 0) {
-      pot.style.background = 'transparent';
-      if (potText) potText.textContent = 'Arrastra DOS colores aquí';
-      if (display) display.innerHTML = '';
+    // Si es modo primary, evaluar de inmediato
+    if (pot.dataset.mode === 'primary') {
+      this.playSound('drop');
+      this.updateMixingPot([color], colorHex);
+      setTimeout(() => {
+        this.checkMixture([color], colorMixtureCombinations, colorHex);
+      }, 300);
       return;
     }
 
-    if (colors.length === 1) {
-      const hex = colorHex[colors[0]] || colors[0];
-      pot.style.background = hex;
-      pot.classList.add('mixed');
-      if (potText) potText.textContent = `Has agregado ${this.getColorName(colors[0])}`;
-      if (display) display.innerHTML = `<p>Colores mezclados: 1/2</p>`;
-    } else if (colors.length === 2) {
-      const hex0 = colorHex[colors[0]];
-      const hex1 = colorHex[colors[1]];
-      const gradient = `linear-gradient(45deg, ${hex0}, ${hex1})`;
-      pot.style.background = gradient;
-      pot.classList.add('mixed');
-      if (potText) potText.textContent = `Mezcla: ${this.getColorName(colors[0])} + ${this.getColorName(colors[1])}`;
-      if (display) display.innerHTML = `<p>Colores mezclados: 2/2</p>`;
+    if (!mixedColors.includes(color)) {
+      mixedColors.push(color);
+      this.playSound('drop');
+      this.updateMixingPot(mixedColors, colorHex);
+      if (mixedColors.length >= 2) {
+        setTimeout(() => {
+          this.checkMixture(mixedColors, colorMixtureCombinations, colorHex);
+        }, 700);
+      }
     } else {
-      if (display) display.innerHTML = `<p>Solo se permiten 2 colores. Reiniciando...</p>`;
-      setTimeout(() => {
-        if (typeof this.resetMixing === 'function') this.resetMixing();
-      }, 800);
+      if (resultDisplay) {
+        resultDisplay.innerHTML = `<p>Ya agregaste ${this.getColorName(color)}.</p>`;
+      }
+      this.playSound('click');
     }
+  });
+
+  this.resetMixing = () => {
+    mixedColors = [];
+    if (pot) {
+      pot.style.background = 'transparent';
+      pot.classList.remove('mixed');
+      if (potText) potText.textContent = pot.dataset.mode === 'primary' 
+        ? 'Haz clic o arrastra el color correcto' 
+        : 'Arrastra DOS colores aquí';
+    }
+    if (resultDisplay) resultDisplay.innerHTML = '';
+  };
+},
+
+updateMixingPot(colors, colorHex) {
+  const pot = document.getElementById('mixingPot');
+  const display = document.getElementById('resultDisplay');
+  const potText = document.getElementById('potText');
+  if (!pot) return;
+
+  const mode = pot.dataset.mode || 'mix';
+  if (colors.length === 0) {
+    pot.style.background = 'transparent';
+    if (potText) potText.textContent = mode === 'primary' ? 'Haz clic o arrastra el color correcto' : 'Arrastra DOS colores aquí';
+    if (display) display.innerHTML = '';
+    return;
   }
 
-  checkMixture(colors, colorMixtureCombinations, colorHex) {
-    const pot = document.getElementById('mixingPot');
-    const targetColor = pot ? pot.dataset.target : null;
-    const display = document.getElementById('resultDisplay');
-    const requiredColors = colorMixtureCombinations[targetColor] || [];
+  if (mode === 'primary') {
+    const hex = colorHex[colors[0]] || colors[0];
+    pot.style.background = hex;
+    pot.classList.add('mixed');
+    if (potText) potText.textContent = `Has seleccionado ${this.getColorName(colors[0])}`;
+    if (display) display.innerHTML = `<p>Seleccionado: ${this.getColorName(colors[0])}</p>`;
+    return;
+  }
 
-    const correctMixture = requiredColors.length === 2 &&
-      colors.includes(requiredColors[0]) &&
-      colors.includes(requiredColors[1]) &&
-      colors.length === 2;
+  // modo mix (dos colores)
+  if (colors.length === 1) {
+    const hex = colorHex[colors[0]] || colors[0];
+    pot.style.background = hex;
+    pot.classList.add('mixed');
+    if (potText) potText.textContent = `Has agregado ${this.getColorName(colors[0])}`;
+    if (display) display.innerHTML = `<p>Colores mezclados: 1/2</p>`;
+  } else if (colors.length === 2) {
+    const hex0 = colorHex[colors[0]];
+    const hex1 = colorHex[colors[1]];
+    const gradient = `linear-gradient(45deg, ${hex0}, ${hex1})`;
+    pot.style.background = gradient;
+    pot.classList.add('mixed');
+    if (potText) potText.textContent = `Mezcla: ${this.getColorName(colors[0])} + ${this.getColorName(colors[1])}`;
+    if (display) display.innerHTML = `<p>Colores mezclados: 2/2</p>`;
+  } else {
+    if (display) display.innerHTML = `<p>Solo se permiten 2 colores. Reiniciando...</p>`;
+    setTimeout(() => {
+      if (typeof this.resetMixing === 'function') this.resetMixing();
+    }, 800);
+  }
+},
 
-    if (correctMixture) {
+checkMixture(colors, colorMixtureCombinations, colorHex) {
+  const pot = document.getElementById('mixingPot');
+  const targetColor = pot ? pot.dataset.target : null;
+  const display = document.getElementById('resultDisplay');
+  const mode = pot ? pot.dataset.mode : 'mix';
+
+  // Si es modo primary -> basta con que el usuario elija ese color
+  if (mode === 'primary') {
+    if (colors[0] === targetColor) {
       this.playSound('success');
-      if (display) display.innerHTML = `<p>¡Perfecto! Has creado ${this.getColorName(targetColor)}.</p>`;
-      setTimeout(() => {
-        this.levelComplete();
-      }, 700);
+      if (display) display.innerHTML = `<p>¡Perfecto! Has seleccionado ${this.getColorName(targetColor)}.</p>`;
+      setTimeout(() => this.levelComplete(), 700);
     } else {
-      let hint = `Necesitas crear ${this.getColorName(targetColor)} mezclando `;
-      if (requiredColors.length === 2) {
-        hint += `${this.getColorName(requiredColors[0])} + ${this.getColorName(requiredColors[1])}.`;
-      } else {
-        hint = `Intenta mezclar dos colores primarios para conseguir ${this.getColorName(targetColor)}.`;
-      }
-      if (display) {
-        display.innerHTML = `<p>¡Mezcla incorrecta! ${hint}</p>`;
-      }
+      if (display) display.innerHTML = `<p>Ese no es ${this.getColorName(targetColor)}. Selecciona ${this.getColorName(targetColor)}.</p>`;
       this.playSound('error');
       setTimeout(() => {
         if (typeof this.resetMixing === 'function') this.resetMixing();
-      }, 1400);
+      }, 1000);
     }
+    return;
   }
+
+  // Modo mix: comparar con combinaciones definidas
+  const requiredColors = colorMixtureCombinations[targetColor] || [];
+
+  const correctMixture = requiredColors.length === 2 &&
+    colors.includes(requiredColors[0]) &&
+    colors.includes(requiredColors[1]) &&
+    colors.length === 2;
+
+  if (correctMixture) {
+    this.playSound('success');
+    if (display) display.innerHTML = `<p>¡Perfecto! Has creado ${this.getColorName(targetColor)}.</p>`;
+    setTimeout(() => {
+      this.levelComplete();
+    }, 700);
+  } else {
+    let hint = `Necesitas crear ${this.getColorName(targetColor)} mezclando `;
+    if (requiredColors.length === 2) {
+      hint += `${this.getColorName(requiredColors[0])} + ${this.getColorName(requiredColors[1])}.`;
+    } else {
+      hint = `Intenta mezclar dos colores primarios para conseguir ${this.getColorName(targetColor)}.`;
+    }
+    if (display) {
+      display.innerHTML = `<p>¡Mezcla incorrecta! ${hint}</p>`;
+    }
+    this.playSound('error');
+    setTimeout(() => {
+      if (typeof this.resetMixing === 'function') this.resetMixing();
+    }, 1400);
+  }
+},
 
   getColorName(color) {
     const colorNames = {
