@@ -517,3 +517,864 @@ class ChromaQuest {
     player.style.left = (this.playerPos.x * cellSize) + 'px';
     player.style.top = (this.playerPos.y * cellSize) + 'px';
   }
+  createShapeGame(container) {
+    const gameUI = document.createElement('div');
+    gameUI.className = 'shape-game';
+    gameUI.innerHTML = `
+      <div class="shape-instructions">
+        <h3>🧩 Encuentra la forma correcta</h3>
+        <p>Selecciona la forma que coincide con el patrón de colores</p>
+        <div class="target-pattern" id="targetPattern"></div>
+      </div>
+      <div class="shape-options" id="shapeOptions"></div>
+    `;
+    container.appendChild(gameUI);
+    this.setupShapeGame();
+    this.applyShapeGameStyles();
+  }
+
+  setupShapeGame() {
+    const patterns = [
+      { shape: '🔺', colors: ['red', 'blue', 'yellow'] },
+      { shape: '⭕', colors: ['green', 'orange', 'purple'] },
+      { shape: '⭐', colors: ['yellow', 'red', 'blue'] },
+      { shape: '🔷', colors: ['blue', 'green', 'orange'] }
+    ];
+
+    const correctPattern = patterns[Math.floor(Math.random() * patterns.length)];
+    const target = document.getElementById('targetPattern');
+    if (target) {
+      target.innerHTML = `
+        <div class="pattern-display">
+          <div class="pattern-shape">${correctPattern.shape}</div>
+          <div class="pattern-colors">
+            ${correctPattern.colors.map(color => `<div class="color-sample" style="background: ${color};"></div>`).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    const options = document.getElementById('shapeOptions');
+    if (!options) return;
+    const shuffledPatterns = [...patterns].sort(() => Math.random() - 0.5);
+
+    shuffledPatterns.forEach(pattern => {
+      const option = document.createElement('div');
+      option.className = 'shape-option';
+      option.innerHTML = `
+        <div class="option-shape">${pattern.shape}</div>
+        <div class="option-colors">
+          ${pattern.colors.map(color => `<div class="color-sample" style="background: ${color};"></div>`).join('')}
+        </div>
+      `;
+      option.onclick = () => {
+        const isCorrect = pattern.shape === correctPattern.shape &&
+                          pattern.colors.every((c, i) => c === correctPattern.colors[i]);
+        if (isCorrect) {
+          this.playSound('success');
+          this.levelComplete();
+        } else {
+          this.playSound('error');
+          this.showError('¡Forma incorrecta! Intenta de nuevo.');
+        }
+      };
+      options.appendChild(option);
+    });
+  }
+  createRhythmGame(container) {
+    const gameUI = document.createElement('div');
+    gameUI.className = 'rhythm-game';
+    gameUI.innerHTML = `
+      <div class="rhythm-instructions">
+        <h3>🎵 ¡Toca al ritmo!</h3>
+        <p>Presiona los botones cuando las notas lleguen al centro</p>
+      </div>
+      <div class="rhythm-track" id="rhythmTrack">
+        <div class="track-line"></div>
+        <div class="hit-zone"></div>
+      </div>
+      <div class="rhythm-controls">
+        <button class="rhythm-btn" onclick="game.hitNote(0)">🔴</button>
+        <button class="rhythm-btn" onclick="game.hitNote(1)">🔵</button>
+        <button class="rhythm-btn" onclick="game.hitNote(2)">🟡</button>
+        <button class="rhythm-btn" onclick="game.hitNote(3)">🟢</button>
+      </div>
+    `;
+    container.appendChild(gameUI);
+    this.startRhythmGame();
+    this.applyRhythmGameStyles();
+  }
+
+  startRhythmGame() {
+    this.notes = [];
+    this.score = 0;
+    this.rhythmActive = true;
+
+    const spawnNote = () => {
+      if (!this.rhythmActive) return;
+      const track = document.getElementById('rhythmTrack');
+      if (!track) return;
+      const note = document.createElement('div');
+      note.className = 'rhythm-note';
+      note.style.left = Math.floor(Math.random() * 4) * 75 + 'px';
+      track.appendChild(note);
+      this.notes.push({
+        element: note,
+        position: 0,
+        active: true
+      });
+      setTimeout(spawnNote, 1000 + Math.random() * 1000);
+    };
+
+    this.updateRhythmGame();
+    spawnNote();
+
+    setTimeout(() => {
+      this.rhythmActive = false;
+      if (this.score >= 10) {
+        this.levelComplete();
+      } else {
+        this.showError('¡Necesitas más puntos! Intenta de nuevo.');
+      }
+    }, 30000);
+  }
+
+  updateRhythmGame() {
+    if (!this.rhythmActive) return;
+    this.notes.forEach((note, index) => {
+      if (note.active) {
+        note.position += 2;
+        note.element.style.top = note.position + 'px';
+        if (note.position > 400) {
+          note.element.remove();
+          note.active = false;
+        }
+      }
+    });
+    this.notes = this.notes.filter(note => note.active);
+    requestAnimationFrame(() => this.updateRhythmGame());
+  }
+
+  hitNote(lane) {
+    const hitNotes = this.notes.filter(note => {
+      const noteLane = Math.round(parseInt(note.element.style.left || '0', 10) / 75);
+      return Math.abs(noteLane - lane) < 1 && note.position > 350 && note.position < 400;
+    });
+
+    if (hitNotes.length > 0) {
+      const note = hitNotes[0];
+      note.element.remove();
+      note.active = false;
+      this.score++;
+      this.playSound('hit');
+      this.showHitEffect(lane);
+    } else {
+      this.playSound('miss');
+    }
+  }
+
+  showHitEffect(lane) {
+    const effect = document.createElement('div');
+    effect.className = 'hit-effect';
+    effect.style.left = (lane * 75) + 'px';
+    const track = document.getElementById('rhythmTrack');
+    if (track) track.appendChild(effect);
+    setTimeout(() => {
+      effect.remove();
+    }, 500);
+  }
+  createCombinationGame(container) {
+    const combinations = [
+      { elements: ['☀️', '💧'], result: '🌈', color: 'yellow' },
+      { elements: ['🔥', '🌿'], result: '🍁', color: 'orange' },
+      { elements: ['🌙', '⭐'], result: '✨', color: 'white' },
+      { elements: ['💧', '❄️'], result: '💎', color: 'turquoise' }
+    ];
+
+    const combo = combinations[Math.floor(Math.random() * combinations.length)];
+
+    const gameUI = document.createElement('div');
+    gameUI.className = 'combination-game';
+    gameUI.innerHTML = `
+      <div class="combination-instructions">
+        <h3>🧪 Combina los elementos</h3>
+        <p>Arrastra los dos elementos correctos al círculo mágico para crear: <strong>${this.getColorName(combo.color)}</strong></p>
+      </div>
+      <div class="combination-area">
+        <div class="element-pool" id="elementPool"></div>
+        <div class="combination-circle" id="combinationCircle" data-target="${combo.result}">
+          <div class="circle-label">🌀</div>
+        </div>
+        <div class="combination-result" id="combinationResult"></div>
+      </div>
+    `;
+    container.appendChild(gameUI);
+
+    this.setupCombinationGame(combo);
+    this.applyCombinationGameStyles();
+  }
+
+  setupCombinationGame(combo) {
+    const pool = document.getElementById('elementPool');
+    const circle = document.getElementById('combinationCircle');
+    const result = document.getElementById('combinationResult');
+    let selected = [];
+
+    const allElements = ['☀️', '💧', '🔥', '🌿', '🌙', '⭐', '❄️'];
+    const shuffled = [...new Set([...combo.elements, ...allElements])].sort(() => Math.random() - 0.5);
+
+    shuffled.forEach(symbol => {
+      const el = document.createElement('div');
+      el.className = 'element';
+      el.textContent = symbol;
+      el.setAttribute('draggable', 'true');
+      el.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('symbol', symbol);
+      });
+      el.addEventListener('click', () => {
+        if (!selected.includes(symbol)) {
+          selected.push(symbol);
+          this.playSound('click');
+          this.updateCombinationCircle(selected);
+          if (selected.length === 2) {
+            setTimeout(() => {
+              this.checkCombination(selected, combo);
+            }, 600);
+          }
+        }
+      });
+      pool.appendChild(el);
+    });
+
+    circle.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      circle.classList.add('dragover');
+    });
+
+    circle.addEventListener('dragleave', () => {
+      circle.classList.remove('dragover');
+    });
+
+    circle.addEventListener('drop', (e) => {
+      e.preventDefault();
+      circle.classList.remove('dragover');
+      const symbol = e.dataTransfer.getData('symbol');
+      if (!selected.includes(symbol)) {
+        selected.push(symbol);
+        this.playSound('drop');
+        this.updateCombinationCircle(selected);
+        if (selected.length === 2) {
+          setTimeout(() => {
+            this.checkCombination(selected, combo);
+          }, 600);
+        }
+      }
+    });
+
+    this.resetCombination = () => {
+      selected = [];
+      this.updateCombinationCircle([]);
+      if (result) result.innerHTML = '';
+    };
+  }
+
+  updateCombinationCircle(symbols) {
+    const circle = document.getElementById('combinationCircle');
+    if (!circle) return;
+    const label = circle.querySelector('.circle-label');
+    label.textContent = symbols.join(' + ') || '🌀';
+  }
+
+  checkCombination(symbols, combo) {
+    const result = document.getElementById('combinationResult');
+    const correct = combo.elements.every(el => symbols.includes(el)) && symbols.length === 2;
+
+    if (correct) {
+      this.playSound('success');
+      if (result) result.innerHTML = `<p>¡Has creado ${combo.result}! El color <strong>${this.getColorName(combo.color)}</strong> ha sido restaurado.</p>`;
+      setTimeout(() => {
+        this.levelComplete();
+      }, 1000);
+    } else {
+      this.playSound('error');
+      if (result) result.innerHTML = `<p>Combinación incorrecta. Intenta con otros elementos.</p>`;
+      setTimeout(() => {
+        if (typeof this.resetCombination === 'function') this.resetCombination();
+      }, 1200);
+    }
+  }
+  createVisualGame(container) {
+    const gameUI = document.createElement('div');
+    gameUI.className = 'visual-game';
+    gameUI.innerHTML = `
+      <div class="visual-instructions">
+        <h3>👁️ Observa con atención</h3>
+        <p>Selecciona el patrón que coincide con el modelo objetivo</p>
+        <div class="visual-target" id="visualTarget"></div>
+      </div>
+      <div class="visual-options" id="visualOptions"></div>
+    `;
+    container.appendChild(gameUI);
+    this.setupVisualGame();
+    this.applyVisualGameStyles();
+  }
+
+  setupVisualGame() {
+    const patterns = [
+      ['🔴', '🔵', '🟡', '🟢'],
+      ['🟡', '🔴', '🟢', '🔵'],
+      ['🔵', '🟡', '🔴', '🟢'],
+      ['🟢', '🔴', '🔵', '🟡']
+    ];
+
+    const correctPattern = patterns[Math.floor(Math.random() * patterns.length)];
+    const target = document.getElementById('visualTarget');
+    if (target) {
+      target.innerHTML = `
+        <div class="pattern-row">
+          ${correctPattern.map(symbol => `<span class="pattern-symbol">${symbol}</span>`).join('')}
+        </div>
+      `;
+    }
+
+    const options = document.getElementById('visualOptions');
+    if (!options) return;
+    const shuffled = [...patterns].sort(() => Math.random() - 0.5);
+
+    shuffled.forEach(pattern => {
+      const option = document.createElement('div');
+      option.className = 'visual-option';
+      option.innerHTML = `
+        <div class="pattern-row">
+          ${pattern.map(symbol => `<span class="pattern-symbol">${symbol}</span>`).join('')}
+        </div>
+      `;
+      option.onclick = () => {
+        const isCorrect = pattern.every((s, i) => s === correctPattern[i]);
+        if (isCorrect) {
+          this.playSound('success');
+          this.levelComplete();
+        } else {
+          this.playSound('error');
+          this.showError('¡Patrón incorrecto! Intenta de nuevo.');
+        }
+      };
+      options.appendChild(option);
+    });
+  }
+  createTimedGame(container) {
+    const gameUI = document.createElement('div');
+    gameUI.className = 'timed-game';
+    gameUI.innerHTML = `
+      <div class="timed-instructions">
+        <h3>⏱️ ¡Corre contra el tiempo!</h3>
+        <p>Haz clic en los colores en el orden correcto antes de que se acabe el tiempo</p>
+        <div class="timed-sequence" id="timedSequence"></div>
+        <div class="timed-grid" id="timedGrid"></div>
+        <div class="timer-bar" id="timerBar"></div>
+      </div>
+    `;
+    container.appendChild(gameUI);
+    this.setupTimedGame();
+    this.applyTimedGameStyles();
+  }
+
+  setupTimedGame() {
+    const colors = ['🔴', '🟡', '🔵', '🟢'];
+    const sequence = Array.from({ length: 5 }, () => colors[Math.floor(Math.random() * colors.length)]);
+    const sequenceEl = document.getElementById('timedSequence');
+    const gridEl = document.getElementById('timedGrid');
+    const timerBar = document.getElementById('timerBar');
+    let playerSequence = [];
+    let timeLeft = 10;
+
+    if (sequenceEl) {
+      sequenceEl.innerHTML = sequence.map(c => `<span class="timed-symbol">${c}</span>`).join('');
+    }
+
+    if (gridEl) {
+      colors.forEach(color => {
+        const btn = document.createElement('button');
+        btn.className = 'timed-btn';
+        btn.textContent = color;
+        btn.onclick = () => {
+          playerSequence.push(color);
+          this.playSound('click');
+          if (playerSequence.length === sequence.length) {
+            this.checkTimedSequence(playerSequence, sequence);
+          }
+        };
+        gridEl.appendChild(btn);
+      });
+    }
+
+    const countdown = setInterval(() => {
+      timeLeft--;
+      if (timerBar) {
+        timerBar.style.width = `${(timeLeft / 10) * 100}%`;
+      }
+      if (timeLeft <= 0) {
+        clearInterval(countdown);
+        this.showError('¡Se acabó el tiempo!');
+        setTimeout(() => this.loadLevel(this.currentLevel), 1500);
+      }
+    }, 1000);
+  }
+
+  checkTimedSequence(playerSequence, correctSequence) {
+    const isCorrect = playerSequence.every((c, i) => c === correctSequence[i]);
+    if (isCorrect) {
+      this.playSound('success');
+      this.levelComplete();
+    } else {
+      this.playSound('error');
+      this.showError('¡Secuencia incorrecta!');
+      setTimeout(() => this.loadLevel(this.currentLevel), 1500);
+    }
+  }
+  createReflectionGame(container) {
+    const gameUI = document.createElement('div');
+    gameUI.className = 'reflection-game';
+    gameUI.innerHTML = `
+      <div class="reflection-instructions">
+        <h3>🪞 Encuentra el reflejo correcto</h3>
+        <p>Observa la figura y selecciona su reflejo exacto</p>
+        <div class="reflection-target" id="reflectionTarget"></div>
+      </div>
+      <div class="reflection-options" id="reflectionOptions"></div>
+    `;
+    container.appendChild(gameUI);
+    this.setupReflectionGame();
+    this.applyReflectionGameStyles();
+  }
+
+  setupReflectionGame() {
+    const figures = [
+      ['⬛', '⬜', '⬛'],
+      ['⬜', '⬛', '⬜'],
+      ['⬛', '⬛', '⬜'],
+      ['⬜', '⬛', '⬛']
+    ];
+
+    const original = figures[Math.floor(Math.random() * figures.length)];
+    const correct = [...original].reverse();
+    const distractors = [
+      [...original],
+      ['⬛', '⬜', '⬜'],
+      ['⬜', '⬜', '⬛'],
+      ['⬛', '⬛', '⬛']
+    ].filter(p => p.join('') !== correct.join(''));
+
+    const options = [correct, ...distractors].sort(() => Math.random() - 0.5);
+
+    const target = document.getElementById('reflectionTarget');
+    if (target) {
+      target.innerHTML = `
+        <div class="reflection-row">
+          ${original.map(cell => `<span class="reflection-cell">${cell}</span>`).join('')}
+        </div>
+      `;
+    }
+
+    const container = document.getElementById('reflectionOptions');
+    if (!container) return;
+
+    options.forEach(pattern => {
+      const option = document.createElement('div');
+      option.className = 'reflection-option';
+      option.innerHTML = `
+        <div class="reflection-row">
+          ${pattern.map(cell => `<span class="reflection-cell">${cell}</span>`).join('')}
+        </div>
+      `;
+      option.onclick = () => {
+        const isCorrect = pattern.join('') === correct.join('');
+        if (isCorrect) {
+          this.playSound('success');
+          this.levelComplete();
+        } else {
+          this.playSound('error');
+          this.showError('¡Ese no es el reflejo correcto!');
+        }
+      };
+      container.appendChild(option);
+    });
+  }
+  createBossGame(container) {
+    const gameUI = document.createElement('div');
+    gameUI.className = 'boss-game';
+    gameUI.innerHTML = `
+      <div class="boss-instructions">
+        <h3>🧙‍♂️ ¡Desafío final!</h3>
+        <p>Completa la secuencia de retos para restaurar el color arcoíris</p>
+        <div class="boss-stage" id="bossStage"></div>
+        <div class="boss-feedback" id="bossFeedback"></div>
+      </div>
+    `;
+    container.appendChild(gameUI);
+    this.startBossSequence();
+    this.applyBossGameStyles();
+  }
+
+  startBossSequence() {
+    const stages = ['memory', 'mixing', 'shape'];
+    this.bossProgress = 0;
+    this.bossStages = stages;
+    this.runBossStage(stages[0]);
+  }
+
+  runBossStage(mechanic) {
+    const stage = document.getElementById('bossStage');
+    const feedback = document.getElementById('bossFeedback');
+    if (!stage || !feedback) return;
+
+    stage.innerHTML = '';
+    feedback.innerHTML = `<p>Etapa: ${this.getMechanicName(mechanic)}</p>`;
+
+    switch (mechanic) {
+      case 'memory':
+        this.createMemoryGame(stage);
+        break;
+      case 'mixing':
+        this.createMixingGame(stage);
+        break;
+      case 'shape':
+        this.createShapeGame(stage);
+        break;
+      default:
+        feedback.innerHTML = `<p>Etapa desconocida</p>`;
+    }
+  }
+
+  levelComplete() {
+    if (this.bossStages && this.bossProgress < this.bossStages.length - 1) {
+      this.bossProgress++;
+      this.runBossStage(this.bossStages[this.bossProgress]);
+    } else if (this.currentLevel === 10) {
+      this.unlockedColors.push('rainbow');
+      this.updateColorPalette();
+      this.score += 200;
+      const scoreEl = document.getElementById('scoreDisplay');
+      if (scoreEl) scoreEl.textContent = `Puntos: ${this.score}`;
+      this.showVictoryModal();
+      this.saveProgress();
+      this.playSound('gameComplete');
+    } else {
+      this.currentLevel++;
+      this.loadLevel(this.currentLevel);
+    }
+  }
+
+  getMechanicName(mechanic) {
+    const names = {
+      memory: 'Memoria',
+      mixing: 'Mezcla',
+      shape: 'Formas',
+      rhythm: 'Ritmo',
+      combination: 'Combinación',
+      visual: 'Visual',
+      timed: 'Contrarreloj',
+      reflection: 'Reflejo',
+      boss: 'Desafío Final'
+    };
+    return names[mechanic] || mechanic;
+  }
+  createLogicGame(container) {
+    const gameUI = document.createElement('div');
+    gameUI.className = 'logic-game';
+    gameUI.innerHTML = `
+      <div class="logic-instructions">
+        <h3>🧠 Razonamiento lógico</h3>
+        <p>Lee la afirmación y selecciona la opción correcta</p>
+        <div class="logic-question" id="logicQuestion"></div>
+        <div class="logic-options" id="logicOptions"></div>
+      </div>
+    `;
+    container.appendChild(gameUI);
+    this.setupLogicGame();
+    this.applyLogicGameStyles();
+  }
+
+  setupLogicGame() {
+    const puzzles = [
+      {
+        question: 'Si todos los árboles son verdes y este objeto es un árbol, ¿de qué color es?',
+        options: ['Rojo', 'Verde', 'Azul', 'Amarillo'],
+        answer: 1
+      },
+      {
+        question: 'Si el sol sale por el este y se oculta por el oeste, ¿dónde está el amanecer?',
+        options: ['Norte', 'Sur', 'Este', 'Oeste'],
+        answer: 2
+      },
+      {
+        question: 'Si 3 gatos cazan 3 ratones en 3 minutos, ¿cuántos gatos se necesitan para cazar 6 ratones en 6 minutos?',
+        options: ['3', '6', '2', '1'],
+        answer: 0
+      }
+    ];
+
+    const puzzle = puzzles[Math.floor(Math.random() * puzzles.length)];
+    const questionEl = document.getElementById('logicQuestion');
+    const optionsEl = document.getElementById('logicOptions');
+
+    if (questionEl) questionEl.textContent = puzzle.question;
+    if (!optionsEl) return;
+
+    puzzle.options.forEach((opt, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'logic-btn';
+      btn.textContent = opt;
+      btn.onclick = () => {
+        if (i === puzzle.answer) {
+          this.playSound('success');
+          this.levelComplete();
+        } else {
+          this.playSound('error');
+          this.showError('Respuesta incorrecta. Intenta de nuevo.');
+        }
+      };
+      optionsEl.appendChild(btn);
+    });
+  }
+  createSequenceGame(container) {
+    const gameUI = document.createElement('div');
+    gameUI.className = 'sequence-game';
+    gameUI.innerHTML = `
+      <div class="sequence-instructions">
+        <h3>🔢 Completa la secuencia</h3>
+        <p>Observa el patrón y elige el siguiente elemento correcto</p>
+        <div class="sequence-pattern" id="sequencePattern"></div>
+        <div class="sequence-options" id="sequenceOptions"></div>
+      </div>
+    `;
+    container.appendChild(gameUI);
+    this.setupSequenceGame();
+    this.applySequenceGameStyles();
+  }
+
+  setupSequenceGame() {
+    const patterns = [
+      { sequence: [1, 2, 3, 4], next: 5 },
+      { sequence: ['🔴', '🟡', '🔵'], next: '🟢' },
+      { sequence: ['A', 'B', 'C'], next: 'D' },
+      { sequence: [2, 4, 6, 8], next: 10 },
+      { sequence: ['⬛', '⬜', '⬛'], next: '⬜' }
+    ];
+
+    const puzzle = patterns[Math.floor(Math.random() * patterns.length)];
+    const patternEl = document.getElementById('sequencePattern');
+    const optionsEl = document.getElementById('sequenceOptions');
+
+    if (patternEl) {
+      patternEl.innerHTML = puzzle.sequence.map(el => `<span class="sequence-item">${el}</span>`).join('');
+    }
+
+    const distractors = [puzzle.next, '❌', '💥', '0', 'Z', '🟥', '🟣', '⬛', '⬜'].filter(el => el !== puzzle.next);
+    const choices = [puzzle.next, ...distractors.sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5);
+
+    if (!optionsEl) return;
+    choices.forEach(choice => {
+      const btn = document.createElement('button');
+      btn.className = 'sequence-btn';
+      btn.textContent = choice;
+      btn.onclick = () => {
+        if (choice === puzzle.next) {
+          this.playSound('success');
+          this.levelComplete();
+        } else {
+          this.playSound('error');
+          this.showError('¡Esa no es la opción correcta!');
+        }
+      };
+      optionsEl.appendChild(btn);
+    });
+  }
+  createSoundGame(container) {
+    const gameUI = document.createElement('div');
+    gameUI.className = 'sound-game';
+    gameUI.innerHTML = `
+      <div class="sound-instructions">
+        <h3>🔊 Escucha y repite</h3>
+        <p>Escucha la secuencia de sonidos y repítela en el mismo orden</p>
+        <div class="sound-controls" id="soundControls"></div>
+        <div class="sound-feedback" id="soundFeedback"></div>
+      </div>
+    `;
+    container.appendChild(gameUI);
+    this.setupSoundGame();
+    this.applySoundGameStyles();
+  }
+
+  setupSoundGame() {
+    const sounds = ['beep', 'click', 'drop', 'success'];
+    const sequence = Array.from({ length: 4 + this.currentLevel }, () => sounds[Math.floor(Math.random() * sounds.length)]);
+    const playerSequence = [];
+    const controls = document.getElementById('soundControls');
+    const feedback = document.getElementById('soundFeedback');
+
+    if (!controls) return;
+
+    // Mostrar botones de sonido
+    sounds.forEach((sound, index) => {
+      const btn = document.createElement('button');
+      btn.className = 'sound-btn';
+      btn.textContent = `🔈 ${index + 1}`;
+      btn.onclick = () => {
+        this.playSound(sound);
+        playerSequence.push(sound);
+        if (playerSequence.length === sequence.length) {
+          setTimeout(() => {
+            this.checkSoundSequence(playerSequence, sequence);
+          }, 500);
+        }
+      };
+      controls.appendChild(btn);
+    });
+
+    // Reproducir secuencia al inicio
+    let i = 0;
+    const playNext = () => {
+      if (i < sequence.length) {
+        this.playSound(sequence[i]);
+        i++;
+        setTimeout(playNext, 800);
+      } else if (feedback) {
+        feedback.innerHTML = `<p>¡Ahora repite la secuencia!</p>`;
+      }
+    };
+    setTimeout(playNext, 1000);
+  }
+
+  checkSoundSequence(playerSequence, correctSequence) {
+    const isCorrect = playerSequence.every((s, i) => s === correctSequence[i]);
+    if (isCorrect) {
+      this.playSound('success');
+      this.levelComplete();
+    } else {
+      this.playSound('error');
+      this.showError('¡Secuencia incorrecta! Intenta de nuevo.');
+      setTimeout(() => this.loadLevel(this.currentLevel), 1500);
+    }
+  }
+  createReactionGame(container) {
+    const gameUI = document.createElement('div');
+    gameUI.className = 'reaction-game';
+    gameUI.innerHTML = `
+      <div class="reaction-instructions">
+        <h3>⚡ ¡Reacciona rápido!</h3>
+        <p>Haz clic en el símbolo especial tan pronto como aparezca</p>
+        <div class="reaction-zone" id="reactionZone"></div>
+        <div class="reaction-feedback" id="reactionFeedback"></div>
+      </div>
+    `;
+    container.appendChild(gameUI);
+    this.setupReactionGame();
+    this.applyReactionGameStyles();
+  }
+
+  setupReactionGame() {
+    const zone = document.getElementById('reactionZone');
+    const feedback = document.getElementById('reactionFeedback');
+    const symbols = ['🌟', '💥', '⚡', '🔥', '🎯'];
+    const target = '⚡';
+    let clicked = false;
+
+    if (!zone || !feedback) return;
+
+    zone.innerHTML = `<p>Prepárate...</p>`;
+    setTimeout(() => {
+      const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+      zone.innerHTML = `<button class="reaction-symbol">${symbol}</button>`;
+      const btn = zone.querySelector('.reaction-symbol');
+      const startTime = performance.now();
+
+      btn.onclick = () => {
+        if (clicked) return;
+        clicked = true;
+        const reactionTime = performance.now() - startTime;
+        if (symbol === target && reactionTime < 1000) {
+          this.playSound('success');
+          feedback.innerHTML = `<p>¡Excelente reflejo! Tiempo: ${Math.floor(reactionTime)} ms</p>`;
+          setTimeout(() => this.levelComplete(), 1000);
+        } else {
+          this.playSound('error');
+          feedback.innerHTML = `<p>¡Fallaste! Era ${target} o tardaste demasiado.</p>`;
+          setTimeout(() => this.loadLevel(this.currentLevel), 1500);
+        }
+      };
+    }, 2000 + Math.random() * 2000);
+  }
+
+    createStrategyGame(container) {
+    const gameUI = document.createElement('div');
+    gameUI.className = 'strategy-game';
+    gameUI.innerHTML = `
+      <div class="strategy-instructions">
+        <h3>♟️ Estrategia y planificación</h3>
+        <p>Activa todos los nodos sin pasar dos veces por el mismo</p>
+        <div class="strategy-grid" id="strategyGrid"></div>
+        <div class="strategy-feedback" id="strategyFeedback"></div>
+      </div>
+    `;
+    container.appendChild(gameUI);
+    this.setupStrategyGame();
+    this.applyStrategyGameStyles();
+  }
+
+  setupStrategyGame() {
+    const gridSize = 4;
+    const grid = document.getElementById('strategyGrid');
+    const feedback = document.getElementById('strategyFeedback');
+    this.strategyVisited = [];
+    this.strategyPath = [];
+
+    if (!grid || !feedback) return;
+    grid.innerHTML = '';
+
+    for (let y = 0; y < gridSize; y++) {
+      for (let x = 0; x < gridSize; x++) {
+        const cell = document.createElement('div');
+        cell.className = 'strategy-cell';
+        cell.dataset.x = x;
+        cell.dataset.y = y;
+        cell.textContent = '⬜';
+        cell.onclick = () => this.selectStrategyCell(x, y);
+        grid.appendChild(cell);
+      }
+    }
+
+    feedback.innerHTML = `<p>Selecciona los nodos estratégicamente</p>`;
+  }
+
+  selectStrategyCell(x, y) {
+    const key = `${x},${y}`;
+    if (this.strategyVisited.includes(key)) {
+      this.playSound('error');
+      this.showError('¡Ya pasaste por ese nodo!');
+      return;
+    }
+
+    this.strategyVisited.push(key);
+    this.strategyPath.push({ x, y });
+    this.playSound('click');
+
+    const grid = document.getElementById('strategyGrid');
+    if (!grid) return;
+
+    const cells = grid.querySelectorAll('.strategy-cell');
+    cells.forEach(cell => {
+      if (cell.dataset.x == x && cell.dataset.y == y) {
+        cell.textContent = '🟩';
+        cell.classList.add('visited');
+      }
+    });
+
+    if (this.strategyVisited.length === 16) {
+      this.playSound('success');
+      const feedback = document.getElementById('strategyFeedback');
+      if (feedback) feedback.innerHTML = `<p>¡Has activado todos los nodos sin repetir!</p>`;
+      setTimeout(() => this.levelComplete(), 1000);
+    }
+  }
+
