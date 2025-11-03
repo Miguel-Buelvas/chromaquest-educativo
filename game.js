@@ -1,1431 +1,1326 @@
-// ChromaQuest: El Mundo sin Color - Versión completa con 10 niveles (CORREGIDA)
+// ChromaQuest: El Mundo sin Color - Lógica del Juego
 class ChromaQuest {
-  constructor() {
-    this.currentLevel = 1;
-    this.score = 0;
-    this.unlockedColors = [];
-    this.gameSettings = {
-      musicVolume: 70,
-      sfxVolume: 80,
-      voiceEnabled: true,
-      colorblindMode: false
-    };
-    this.levels = [
-      { name: "El Bosque Gris", color: "green", mechanic: "memory" },
-      { name: "El Lago Oscuro", color: "green", mechanic: "mixing" }, // ✅ AHORA ES UN COLOR SECUNDARIO
-      { name: "El Desierto Sin Sol", color: "red", mechanic: "maze" },
-      { name: "La Montaña de Sombras", color: "orange", mechanic: "shape" },
-      { name: "El Valle del Ritmo", color: "purple", mechanic: "rhythm" },
-      { name: "El Cielo Sin Arcoíris", color: "yellow", mechanic: "combination" },
-      { name: "El Castillo de Cristal", color: "pink", mechanic: "visual" },
-      { name: "El Templo del Tiempo", color: "turquoise", mechanic: "timed" },
-      { name: "El Laberinto de Espejos", color: "white", mechanic: "reflection" },
-      { name: "El Trono del Rey Gris", color: "rainbow", mechanic: "boss" }
-    ];
-    this.init();
-  }
-  
-  init() {
-    this.loadSettings();
-    this.setupEventListeners();
-    this.updateColorPalette();
-    this.animateTitle();
-  }
-
-  loadSettings() {
-    const saved = localStorage.getItem('chromaquest-settings');
-    if (saved) {
-      this.gameSettings = { ...this.gameSettings, ...JSON.parse(saved) };
-    }
-    this.applySettings();
-  }
-
-  saveSettings() {
-    localStorage.setItem('chromaquest-settings', JSON.stringify(this.gameSettings));
-  }
-
-  applySettings() {
-    const mv = document.getElementById('musicVolume');
-    const sv = document.getElementById('sfxVolume');
-    const vt = document.getElementById('voiceToggle');
-    const ct = document.getElementById('colorblindToggle');
-    if (mv) mv.value = this.gameSettings.musicVolume;
-    if (sv) sv.value = this.gameSettings.sfxVolume;
-    if (vt) vt?.classList.toggle('active', this.gameSettings.voiceEnabled);
-    if (ct) ct?.classList.toggle('active', this.gameSettings.colorblindMode);
-  }
-
-  setupEventListeners() {
-    const mv = document.getElementById('musicVolume');
-    const sv = document.getElementById('sfxVolume');
-    if (mv) mv.addEventListener('input', (e) => {
-      this.gameSettings.musicVolume = e.target.value;
-      this.saveSettings();
-    });
-    if (sv) sv.addEventListener('input', (e) => {
-      this.gameSettings.sfxVolume = e.target.value;
-      this.saveSettings();
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        this.closeAllModals();
-      }
-    });
-  }
-
-  animateTitle() {
-    if (typeof anime !== 'undefined') {
-      anime({
-        targets: '.game-title',
-        scale: [0.8, 1],
-        opacity: [0, 1],
-        duration: 1000,
-        easing: 'easeOutElastic(1, .8)',
-        delay: 500
-      });
-      anime({
-        targets: '.shape',
-        translateY: [-20, 20],
-        rotate: [0, 360],
-        duration: 4000,
-        loop: true,
-        direction: 'alternate',
-        easing: 'easeInOutSine',
-        delay: anime.stagger(500)
-      });
-    }
-  }
-
-  startGame() {
-    const mainMenu = document.getElementById('mainMenu');
-    const gameLevel = document.getElementById('gameLevel');
-    if (mainMenu) mainMenu.style.display = 'none';
-    if (gameLevel) gameLevel.style.display = 'block';
-    this.loadLevel(this.currentLevel);
-  }
-
-  loadLevel(levelNum) {
-    const level = this.levels[levelNum - 1];
-    const titleEl = document.getElementById('levelTitle');
-    if (titleEl) titleEl.textContent = `Nivel ${levelNum}: ${level.name}`;
-    const gameArea = document.getElementById('gameArea');
-    if (!gameArea) return;
-    gameArea.innerHTML = '';
-    switch (level.mechanic) {
-      case 'memory': this.createMemoryGame(gameArea); break;
-      case 'mixing': this.createMixingGame(gameArea); break;
-      case 'maze': this.createMazeGame(gameArea); break;
-      case 'shape': this.createShapeGame(gameArea); break;
-      case 'rhythm': this.createRhythmGame(gameArea); break;
-      case 'combination': this.createCombinationGame(gameArea); break;
-      case 'visual': this.createVisualGame(gameArea); break;
-      case 'timed': this.createTimedGame(gameArea); break;
-      case 'reflection': this.createReflectionGame(gameArea); break;
-      case 'boss': this.createBossGame(gameArea); break;
-      default:
-        this.showError('Nivel no implementado aún.');
-    }
-    this.playSound('levelStart');
-    this.showInstructions(level.mechanic);
-  }
-
-  // === F U N C I O N E S  F A L T A N T E S  (implementadas aquí) ===
-  playSound(soundName) {
-    // Aquí puedes integrar Web Audio API o simplemente simular con console.log
-    // Para un MVP funcional, no rompe si no existe.
-    if (typeof console !== 'undefined') {
-      // console.log(`[Sound]: ${soundName}`);
-    }
-  }
-
-  showError(message) {
-    const gameArea = document.getElementById('gameArea');
-    if (gameArea) {
-      gameArea.innerHTML = `<div class="error-message" style="color: red; padding: 20px; font-weight: bold;">${message}</div>`;
-    }
-  }
-
-  showInstructions(mechanic) {
-    // Opcional: ya está incluido en cada createXGame()
-  }
-
-  closeAllModals() {
-    // Cierra cualquier modal activo (puedes personalizar según tu HTML)
-    const modals = document.querySelectorAll('.modal');
-    modals.forEach(m => m.style.display = 'none');
-  }
-
-  updateColorPalette() {
-    // Ejemplo mínimo: actualiza un elemento visual con colores desbloqueados
-    const palette = document.getElementById('colorPalette');
-    if (palette) {
-      palette.innerHTML = this.unlockedColors.map(c => `<div class="color-sample" style="background: ${c === 'rainbow' ? 'linear-gradient(to right, red, orange, yellow, green, blue, indigo, violet)' : c}"></div>`).join('');
-    }
-  }
-
-  // === C O R R E C C I Ó N  C R Í T I C A: Nivel de Mezcla ===
-  createMixingGame(container) {
-    const targetColor = this.levels[this.currentLevel - 1].color; // e.g., "blue"
-    const isPrimary = ['red','blue','yellow'].includes(targetColor);
-
-    const gameUI = document.createElement('div');
-    gameUI.className = 'mixing-game';
-    gameUI.innerHTML = `
-      <div class="mixing-instructions">
-        <h3>🎨 ${isPrimary ? 'Selecciona el color' : 'Mezcla dos colores'}</h3>
-        <p>${isPrimary ? `Consigue el color: <strong>${this.getColorName(targetColor)}</strong>` 
-                        : `Crea el color: <strong>${this.getColorName(targetColor)}</strong>`}</p>
-      </div>
-      <div class="color-sources" id="colorSources"></div>
-      <div class="mixing-pot" id="mixingPot" data-target="${targetColor}" data-mode="${isPrimary ? 'primary' : 'mix'}">
-        <div id="potText">${isPrimary ? 'Haz clic o arrastra el color correcto' : 'Arrastra DOS colores aquí'}</div>
-      </div>
-      <div class="result-display" id="resultDisplay"></div>
-    `;
-    container.appendChild(gameUI);
-
-    const availableColors = ['red', 'blue', 'yellow'];
-    const sources = document.getElementById('colorSources');
-    availableColors.forEach(color => {
-      const el = document.createElement('div');
-      el.className = 'color-source';
-      el.style.backgroundColor = this.colorHex[color];
-      el.setAttribute('data-color', color);
-      el.setAttribute('draggable', 'true');
-      el.title = this.getColorName(color);
-      sources.appendChild(el);
-    });
-
-    // Definir combinaciones y hexadecimales como propiedades de clase
-    this.colorMixtureCombinations = {
-      orange: ['red', 'yellow'],
-      green: ['blue', 'yellow'],
-      purple: ['red', 'blue']
-    };
-
-    this.colorHex = {
-      red: '#FF0000',
-      blue: '#0000FF',
-      yellow: '#FFFF00',
-      orange: '#FFA500',
-      green: '#008000',
-      purple: '#800080'
-    };
-
-    // Iniciar lógica de mezcla
-    this.setupMixingGame();
-  }
-
-  setupMixingGame() {
-    const pot = document.getElementById('mixingPot');
-    const sources = document.querySelectorAll('.color-source');
-    const resultDisplay = document.getElementById('resultDisplay');
-    const potText = document.getElementById('potText');
-    let mixedColors = [];
-
-    // Reinicio local
-    const resetMixing = () => {
-      mixedColors = [];
-      if (pot) {
-        pot.style.background = 'transparent';
-        pot.classList.remove('mixed');
-        if (potText) potText.textContent = pot.dataset.mode === 'primary' 
-          ? 'Haz clic o arrastra el color correcto' 
-          : 'Arrastra DOS colores aquí';
-      }
-      if (resultDisplay) resultDisplay.innerHTML = '';
-    };
-
-    // Eventos de los botones de color
-    sources.forEach(source => {
-      source.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('color', e.target.dataset.color);
-      });
-
-      source.addEventListener('click', (e) => {
-        const color = e.currentTarget.dataset.color;
-        handleColorSelection(color);
-      });
-    });
-
-    // Eventos del recipiente de mezcla
-    if (pot) {
-      pot.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        pot.classList.add('dragover');
-      });
-
-      pot.addEventListener('dragleave', () => {
-        pot.classList.remove('dragover');
-      });
-
-      pot.addEventListener('drop', (e) => {
-        e.preventDefault();
-        pot.classList.remove('dragover');
-        const color = e.dataTransfer.getData('color');
-        if (color) handleColorSelection(color);
-      });
-    }
-
-    // Función de manejo de selección
-    const handleColorSelection = (color) => {
-      const mode = pot.dataset.mode;
-      if (mode === 'primary') {
-        this.playSound('drop');
-        this.updateMixingPot([color], this.colorHex, mode, pot, potText, resultDisplay);
-        setTimeout(() => {
-          this.checkMixture([color], targetColor, this.colorMixtureCombinations, this.colorHex, resultDisplay, resetMixing);
-        }, 300);
-        return;
-      }
-
-      if (!mixedColors.includes(color)) {
-        mixedColors.push(color);
-        this.playSound('drop');
-        this.updateMixingPot(mixedColors, this.colorHex, mode, pot, potText, resultDisplay);
-        if (mixedColors.length >= 2) {
-          setTimeout(() => {
-            this.checkMixture(mixedColors, targetColor, this.colorMixtureCombinations, this.colorHex, resultDisplay, resetMixing);
-          }, 700);
-        }
-      } else {
-        this.playSound('click');
-      }
-    };
-  }
-
-  updateMixingPot(colors, colorHex, mode, pot, potText, display) {
-    if (!pot) return;
-    if (colors.length === 0) {
-      pot.style.background = 'transparent';
-      pot.classList.remove('mixed');
-      if (potText) potText.textContent = mode === 'primary' ? 'Haz clic o arrastra el color correcto' : 'Arrastra DOS colores aquí';
-      if (display) display.innerHTML = '';
-      return;
-    }
-
-    if (mode === 'primary') {
-      const hex = colorHex[colors[0]] || colors[0];
-      pot.style.background = hex;
-      pot.classList.add('mixed');
-      if (potText) potText.textContent = `Has seleccionado ${this.getColorName(colors[0])}`;
-      if (display) display.innerHTML = `<p>Seleccionado: ${this.getColorName(colors[0])}</p>`;
-      return;
-    }
-
-    if (colors.length === 1) {
-      const hex = colorHex[colors[0]];
-      pot.style.background = hex;
-      pot.classList.add('mixed');
-      if (potText) potText.textContent = `Has agregado ${this.getColorName(colors[0])}`;
-      if (display) display.innerHTML = `<p>Colores mezclados: 1/2</p>`;
-    } else if (colors.length === 2) {
-      const hex0 = colorHex[colors[0]];
-      const hex1 = colorHex[colors[1]];
-      const gradient = `linear-gradient(45deg, ${hex0}, ${hex1})`;
-      pot.style.background = gradient;
-      pot.classList.add('mixed');
-      if (potText) potText.textContent = `Mezcla: ${this.getColorName(colors[0])} + ${this.getColorName(colors[1])}`;
-      if (display) display.innerHTML = `<p>Colores mezclados: 2/2</p>`;
-    } else {
-      if (display) display.innerHTML = `<p>Solo se permiten 2 colores. Reiniciando...</p>`;
-      setTimeout(() => {
-        const reset = () => {
-          if (pot) {
-            pot.style.background = 'transparent';
-            pot.classList.remove('mixed');
-            if (potText) potText.textContent = pot.dataset.mode === 'primary' 
-              ? 'Haz clic o arrastra el color correcto' 
-              : 'Arrastra DOS colores aquí';
-          }
-          if (display) display.innerHTML = '';
+    constructor() {
+        this.currentLevel = 1;
+        this.score = 0;
+        this.unlockedColors = [];
+        this.gameSettings = {
+            musicVolume: 70,
+            sfxVolume: 80,
+            voiceEnabled: true,
+            colorblindMode: false
         };
-        reset();
-      }, 800);
-    }
-  }
-
-  checkMixture(colors, targetColor, colorMixtureCombinations, colorHex, display, resetMixing) {
-    const pot = document.getElementById('mixingPot');
-    const mode = pot ? pot.dataset.mode : 'mix';
-
-    if (mode === 'primary') {
-      if (colors[0] === targetColor) {
-        this.playSound('success');
-        if (display) display.innerHTML = `<p>¡Perfecto! Has seleccionado ${this.getColorName(targetColor)}.</p>`;
-        setTimeout(() => this.levelComplete(), 700);
-      } else {
-        if (display) display.innerHTML = `<p>Ese no es ${this.getColorName(targetColor)}. Selecciona ${this.getColorName(targetColor)}.</p>`;
-        this.playSound('error');
-        setTimeout(() => resetMixing(), 1000);
-      }
-      return;
+        this.levels = [
+            { name: "El Bosque Gris", color: "green", mechanic: "memory" },
+            { name: "El Lago Oscuro", color: "blue", mechanic: "mixing" },
+            { name: "El Desierto Sin Sol", color: "red", mechanic: "maze" },
+            { name: "La Montaña de Sombras", color: "orange", mechanic: "shape" },
+            { name: "El Valle del Ritmo", color: "purple", mechanic: "rhythm" },
+            { name: "El Cielo Sin Arcoíris", color: "yellow", mechanic: "combination" },
+            { name: "El Castillo de Cristal", color: "pink", mechanic: "visual" },
+            { name: "El Templo del Tiempo", color: "turquoise", mechanic: "timed" },
+            { name: "El Laberinto de Espejos", color: "white", mechanic: "reflection" },
+            { name: "El Trono del Rey Gris", color: "rainbow", mechanic: "boss" }
+        ];
+        this.init();
     }
 
-    const requiredColors = colorMixtureCombinations[targetColor] || [];
-    const correctMixture = requiredColors.length === 2 &&
-      colors.includes(requiredColors[0]) &&
-      colors.includes(requiredColors[1]) &&
-      colors.length === 2;
-
-    if (correctMixture) {
-      this.playSound('success');
-      if (display) display.innerHTML = `<p>¡Perfecto! Has creado ${this.getColorName(targetColor)}.</p>`;
-      setTimeout(() => this.levelComplete(), 700);
-    } else {
-      let hint = `Necesitas crear ${this.getColorName(targetColor)} mezclando `;
-      if (requiredColors.length === 2) {
-        hint += `${this.getColorName(requiredColors[0])} + ${this.getColorName(requiredColors[1])}.`;
-      } else {
-        hint = `Intenta mezclar dos colores primarios para conseguir ${this.getColorName(targetColor)}.`;
-      }
-      if (display) display.innerHTML = `<p>¡Mezcla incorrecta! ${hint}</p>`;
-      this.playSound('error');
-      setTimeout(() => resetMixing(), 1400);
+    init() {
+        this.loadSettings();
+        this.setupEventListeners();
+        this.updateColorPalette();
+        this.animateTitle();
     }
-  }
 
-  getColorName(color) {
-    const colorNames = {
-      'green': 'Verde', 'orange': 'Naranja', 'purple': 'Morado',
-      'red': 'Rojo', 'blue': 'Azul', 'yellow': 'Amarillo',
-      'pink': 'Rosa', 'turquoise': 'Turquesa', 'white': 'Blanco',
-      'rainbow': 'Arcoíris'
-    };
-    return colorNames[color] || color;
-  }
-
-  // === R E S T O  D E  L O S  M É T O D O S  (sin cambios, ya estaban bien) ===
-  createMemoryGame(container) {
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
-    const sequence = this.generateSequence(3 + this.currentLevel);
-    let playerSequence = [];
-    const gameUI = document.createElement('div');
-    gameUI.className = 'memory-game';
-    gameUI.innerHTML = `
-      <div class="memory-instructions">
-        <h3>🧠 Memoriza la secuencia de colores</h3>
-        <p>Observa con atención el orden de los colores</p>
-      </div>
-      <div class="sequence-display" id="sequenceDisplay"></div>
-      <div class="color-grid" id="colorGrid"></div>
-      <div class="sequence-input" id="sequenceInput"></div>
-    `;
-    container.appendChild(gameUI);
-    this.showSequence(sequence, colors);
-    const colorGrid = document.getElementById('colorGrid');
-    colors.forEach((color, index) => {
-      const btn = document.createElement('button');
-      btn.className = 'color-btn';
-      btn.style.backgroundColor = color;
-      btn.setAttribute('aria-label', `Color ${index + 1}`);
-      btn.onclick = () => this.addToSequence(color, playerSequence, sequence);
-      colorGrid.appendChild(btn);
-    });
-    this.applyMemoryGameStyles();
-  }
-
-  showSequence(sequence, colors) {
-    const display = document.getElementById('sequenceDisplay');
-    if (!display) return;
-    let i = 0;
-    const showNext = () => {
-      if (i < sequence.length) {
-        display.style.backgroundColor = colors[sequence[i]];
-        display.textContent = `Color ${i + 1}`;
-        this.playSound('beep');
-        setTimeout(() => {
-          display.style.backgroundColor = 'transparent';
-          display.textContent = '';
-          i++;
-          setTimeout(showNext, 300);
-        }, 1000);
-      } else {
-        display.innerHTML = '<h3>¡Ahora tú! Repite la secuencia</h3>';
-      }
-    };
-    showNext();
-  }
-
-  addToSequence(color, playerSequence, correctSequence) {
-    playerSequence.push(color);
-    this.playSound('click');
-    const input = document.getElementById('sequenceInput');
-    if (input) {
-      const dot = document.createElement('div');
-      dot.className = 'sequence-dot';
-      dot.style.backgroundColor = color;
-      input.appendChild(dot);
+    loadSettings() {
+        const saved = localStorage.getItem('chromaquest-settings');
+        if (saved) {
+            this.gameSettings = { ...this.gameSettings, ...JSON.parse(saved) };
+        }
+        this.applySettings();
     }
-    if (playerSequence.length === correctSequence.length) {
-      setTimeout(() => {
-        this.checkSequence(playerSequence, correctSequence);
-      }, 500);
-    }
-  }
 
-  checkSequence(playerSequence, correctSequence) {
-    const palette = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
-    const correctColors = correctSequence.map(i => palette[i]);
-    const isCorrect = playerSequence.every((color, i) => color === correctColors[i]);
-    if (isCorrect) {
-      this.levelComplete();
-    } else {
-      this.showError('Secuencia incorrecta. ¡Inténtalo de nuevo!');
-      setTimeout(() => {
+    saveSettings() {
+        localStorage.setItem('chromaquest-settings', JSON.stringify(this.gameSettings));
+    }
+
+    applySettings() {
+        document.getElementById('musicVolume').value = this.gameSettings.musicVolume;
+        document.getElementById('sfxVolume').value = this.gameSettings.sfxVolume;
+        document.getElementById('voiceToggle').classList.toggle('active', this.gameSettings.voiceEnabled);
+        document.getElementById('colorblindToggle').classList.toggle('active', this.gameSettings.colorblindMode);
+    }
+
+    setupEventListeners() {
+        // Controles de volumen
+        document.getElementById('musicVolume').addEventListener('input', (e) => {
+            this.gameSettings.musicVolume = e.target.value;
+            this.saveSettings();
+        });
+        document.getElementById('sfxVolume').addEventListener('input', (e) => {
+            this.gameSettings.sfxVolume = e.target.value;
+            this.saveSettings();
+        });
+        // Cerrar modales con tecla ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                this.closeAllModals();
+            }
+        });
+    }
+
+    animateTitle() {
+        // Animación del título principal
+        anime({
+            targets: '.game-title',
+            scale: [0.8, 1],
+            opacity: [0, 1],
+            duration: 1000,
+            easing: 'easeOutElastic(1, .8)',
+            delay: 500
+        });
+        // Animación de las formas flotantes
+        anime({
+            targets: '.shape',
+            translateY: [-20, 20],
+            rotate: [0, 360],
+            duration: 4000,
+            loop: true,
+            direction: 'alternate',
+            easing: 'easeInOutSine',
+            delay: anime.stagger(500)
+        });
+    }
+
+    startGame() {
+        document.getElementById('mainMenu').style.display = 'none';
+        document.getElementById('gameLevel').style.display = 'block';
         this.loadLevel(this.currentLevel);
-      }, 2000);
     }
-  }
 
-  generateSequence(length) {
-    return Array.from({ length }, () => Math.floor(Math.random() * 6));
-  }
+    loadLevel(levelNum) {
+        const level = this.levels[levelNum - 1];
+        document.getElementById('levelTitle').textContent = `Nivel ${levelNum}: ${level.name}`;
+        const gameArea = document.getElementById('gameArea');
+        gameArea.innerHTML = '';
+        switch (level.mechanic) {
+            case 'memory':
+                this.createMemoryGame(gameArea);
+                break;
+            case 'mixing':
+                this.createMixingGame(gameArea);
+                break;
+            case 'maze':
+                this.createMazeGame(gameArea);
+                break;
+            case 'shape':
+                this.createShapeGame(gameArea);
+                break;
+            case 'rhythm':
+                this.createRhythmGame(gameArea);
+                break;
+            default:
+                this.createMemoryGame(gameArea);
+        }
+        this.playSound('levelStart');
+        this.showInstructions(level.mechanic);
+    }
 
-  createMazeGame(container) {
+    createMemoryGame(container) {
+        const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'];
+        const sequence = this.generateSequence(3 + this.currentLevel);
+        let playerSequence = [];
+        let showingSequence = true;
+        const gameUI = document.createElement('div');
+        gameUI.className = 'memory-game';
+        gameUI.innerHTML = `
+            <div class="memory-instructions">
+                <h3>🧠 Memoriza la secuencia de colores</h3>
+                <p>Observa con atención el orden de los colores</p>
+            </div>
+            <div class="sequence-display" id="sequenceDisplay"></div>
+            <div class="color-grid" id="colorGrid"></div>
+            <div class="sequence-input" id="sequenceInput"></div>
+        `;
+        container.appendChild(gameUI);
+        // Mostrar secuencia
+        this.showSequence(sequence, colors);
+        // Crear botones de colores
+        const colorGrid = document.getElementById('colorGrid');
+        colors.forEach((color, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'color-btn';
+            btn.style.backgroundColor = color;
+            btn.onclick = () => this.addToSequence(color, playerSequence, sequence);
+            colorGrid.appendChild(btn);
+        });
+        // Aplicar estilos
+        this.applyMemoryGameStyles();
+    }
+
+    showSequence(sequence, colors) {
+        const display = document.getElementById('sequenceDisplay');
+        let i = 0;
+        const showNext = () => {
+            if (i < sequence.length) {
+                display.style.backgroundColor = colors[sequence[i]];
+                display.textContent = `Color ${i + 1}`;
+                this.playSound('beep');
+                setTimeout(() => {
+                    display.style.backgroundColor = 'transparent';
+                    display.textContent = '';
+                    i++;
+                    setTimeout(showNext, 300);
+                }, 1000);
+            } else {
+                document.getElementById('sequenceDisplay').innerHTML = '<h3>¡Ahora tú! Repite la secuencia</h3>';
+            }
+        };
+        showNext();
+    }
+
+    addToSequence(color, playerSequence, correctSequence) {
+        playerSequence.push(color);
+        this.playSound('click');
+        // Mostrar color seleccionado
+        const input = document.getElementById('sequenceInput');
+        const dot = document.createElement('div');
+        dot.className = 'sequence-dot';
+        dot.style.backgroundColor = color;
+        input.appendChild(dot);
+        // Verificar si completó la secuencia
+        if (playerSequence.length === correctSequence.length) {
+            setTimeout(() => {
+                this.checkSequence(playerSequence, correctSequence);
+            }, 500);
+        }
+    }
+
+    checkSequence(playerSequence, correctSequence) {
+        const correctColors = correctSequence.map(i => ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD'][i]);
+        if (JSON.stringify(playerSequence) === JSON.stringify(correctColors)) {
+            this.levelComplete();
+        } else {
+            this.showError('Secuencia incorrecta. ¡Inténtalo de nuevo!');
+            setTimeout(() => {
+                this.loadLevel(this.currentLevel);
+            }, 2000);
+        }
+    }
+
+    generateSequence(length) {
+        return Array.from({ length }, () => Math.floor(Math.random() * 6));
+    }
+
+    createMixingGame(container) {
+        const colorMixtureCombinations = {
+            'green': ['blue', 'yellow'],
+            'orange': ['red', 'yellow'],
+            'purple': ['red', 'blue']
+        };
+        const targetColors = Object.keys(colorMixtureCombinations);
+        const targetColor = targetColors[Math.floor(Math.random() * targetColors.length)];
+        const gameUI = document.createElement('div');
+        gameUI.className = 'mixing-game';
+        gameUI.innerHTML = `
+            <div class="mixing-instructions">
+                <h3>🎨 Mezcla los colores primarios</h3>
+                <p>Arrastra DOS colores primarios para crear un color secundario</p>
+                <div class="target-color" id="targetColor">Crea el color: ${this.getColorName(targetColor).toUpperCase()}</div>
+            </div>
+            <div class="mixing-area">
+                <div class="color-sources">
+                    <div class="color-source" draggable="true" data-color="red" style="background: #FF0000;">🔴</div>
+                    <div class="color-source" draggable="true" data-color="yellow" style="background: #FFFF00;">🟡</div>
+                    <div class="color-source" draggable="true" data-color="blue" style="background: #0000FF;">🔵</div>
+                </div>
+                <div class="mixing-pot" id="mixingPot" data-target="${targetColor}">
+                    <div class="pot-visual">🥣</div>
+                    <p>Arrastra DOS colores aquí</p>
+                </div>
+                <div class="result-display" id="resultDisplay"></div>
+            </div>
+        `;
+        container.appendChild(gameUI);
+        this.setupMixingGame();
+        this.applyMixingGameStyles();
+    }
+
+    setupMixingGame() {
+        const sources = document.querySelectorAll('.color-source');
+        const pot = document.getElementById('mixingPot');
+        let mixedColors = [];
+        const resetPot = () => {
+            mixedColors = [];
+            pot.style.background = 'transparent';
+            pot.style.backgroundColor = 'transparent';
+            document.getElementById('resultDisplay').innerHTML = '<p>Colores mezclados: 0/2</p>';
+        };
+        sources.forEach(source => {
+            source.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('color', e.target.dataset.color);
+            });
+        });
+        pot.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            pot.style.backgroundColor = '#f0f0f0';
+        });
+        pot.addEventListener('dragleave', () => {
+            if (mixedColors.length === 0) pot.style.backgroundColor = 'transparent';
+        });
+        pot.addEventListener('drop', (e) => {
+            e.preventDefault();
+            if (mixedColors.length >= 2) return; // ya no acepta más
+            const color = e.dataTransfer.getData('color');
+            if (mixedColors.includes(color)) return; // evitar duplicados
+            mixedColors.push(color);
+            this.playSound('drop');
+            if (mixedColors.length === 1) {
+                pot.style.backgroundColor = color;
+            } else if (mixedColors.length === 2) {
+                const gradient = `linear-gradient(45deg, ${mixedColors[0]}, ${mixedColors[1]})`;
+                pot.style.background = gradient;
+                pot.style.backgroundColor = ''; // clear solid background
+            }
+            document.getElementById('resultDisplay').innerHTML = `<p>Colores mezclados: ${mixedColors.length}/2</p>`;
+            if (mixedColors.length === 2) {
+                setTimeout(() => {
+                    this.checkMixture([...mixedColors], pot.dataset.target);
+                    resetPot(); // limpiar después de verificar
+                }, 1000);
+            }
+        });
+    }
+
+    checkMixture(colors, targetColor) {
+        const colorMixtureCombinations = {
+            'green': ['blue', 'yellow'],
+            'orange': ['red', 'yellow'],
+            'purple': ['red', 'blue']
+        };
+        const required = colorMixtureCombinations[targetColor];
+        // Orden independiente
+        const matches = required.every(c => colors.includes(c)) && colors.length === 2;
+        if (matches) {
+            this.playSound('success');
+            this.levelComplete();
+        } else {
+            this.showError(`¡Mezcla incorrecta! Necesitas crear ${this.getColorName(targetColor)}.`);
+            setTimeout(() => {
+                this.loadLevel(this.currentLevel);
+            }, 3000);
+        }
+    }
+
+    getColorName(color) {
+        const colorNames = {
+            'green': 'Verde',
+            'orange': 'Naranja', 
+            'purple': 'Morado',
+            'red': 'Rojo',
+            'blue': 'Azul',
+            'yellow': 'Amarillo'
+        };
+        return colorNames[color] || color;
+    }
+
+    createMazeGame(container) {
     const gameUI = document.createElement('div');
     gameUI.className = 'maze-game';
     gameUI.innerHTML = `
-      <div class="maze-instructions">
-        <h3>🧭 Encuentra la salida del laberinto</h3>
-        <p>Usa las flechas para moverte y llegar a la puerta</p>
-      </div>
-      <div class="maze-container" id="mazeContainer">
-        <div class="maze-grid" id="mazeGrid"></div>
-        <div class="player" id="player">🧙‍♀️</div>
-      </div>
-      <div class="maze-controls">
-        <button class="maze-btn" onclick="game.movePlayer('up')">↑</button>
-        <div>
-          <button class="maze-btn" onclick="game.movePlayer('left')">←</button>
-          <button class="maze-btn" onclick="game.movePlayer('down')">↓</button>
-          <button class="maze-btn" onclick="game.movePlayer('right')">→</button>
+        <div class="maze-instructions">
+            <h3>🗺️ Encuentra la salida del laberinto</h3>
+            <p>Usa las flechas para moverte y encuentra la puerta roja</p>
         </div>
-      </div>
+        <div class="maze-container" id="mazeContainer">
+            <div class="maze-grid" id="mazeGrid"></div>
+            <div class="player" id="player">🧙‍♀️</div>
+        </div>
+        <div class="maze-controls" style="display:none;">
+            <button class="maze-btn" onclick="game.movePlayer('up')">↑</button>
+            <div>
+                <button class="maze-btn" onclick="game.movePlayer('left')">←</button>
+                <button class="maze-btn" onclick="game.movePlayer('down')">↓</button>
+                <button class="maze-btn" onclick="game.movePlayer('right')">→</button>
+            </div>
+        </div>
     `;
     container.appendChild(gameUI);
     this.generateMaze();
     this.applyMazeGameStyles();
-  }
 
-  generateMaze() {
-    const maze = [
-      [1,1,1,1,1,1,1,1],
-      [1,0,0,0,1,0,0,1],
-      [1,0,1,0,1,0,1,1],
-      [1,0,1,0,0,0,0,1],
-      [1,0,1,1,1,1,0,1],
-      [1,0,0,0,0,0,0,1],
-      [1,1,1,1,1,1,1,1]
-    ];
-    const grid = document.getElementById('mazeGrid');
-    if (!grid) return;
-    grid.innerHTML = '';
-    for (let y = 0; y < maze.length; y++) {
-      for (let x = 0; x < maze[y].length; x++) {
-        const cell = document.createElement('div');
-        cell.className = 'maze-cell';
-        cell.dataset.x = x;
-        cell.dataset.y = y;
-        if (maze[y][x] === 1) {
-          cell.classList.add('wall');
-        } else {
-          cell.classList.add('path');
-        }
-        if (x === 6 && y === 5) {
-          cell.classList.add('exit');
-          cell.innerHTML = '🚪';
-        }
-        grid.appendChild(cell);
-      }
-    }
-    this.mazeData = maze;
-    this.playerPos = { x: 1, y: 1 };
-    this.updatePlayerPosition();
-  }
-
-  movePlayer(direction) {
-    const { x, y } = this.playerPos;
-    let newX = x;
-    let newY = y;
-    switch (direction) {
-      case 'up': newY--; break;
-      case 'down': newY++; break;
-      case 'left': newX--; break;
-      case 'right': newX++; break;
-    }
-    if (this.mazeData[newY] && this.mazeData[newY][newX] === 0) {
-      this.playerPos = { x: newX, y: newY };
-      this.updatePlayerPosition();
-      this.playSound('move');
-      if (newX === 6 && newY === 5) {
-        setTimeout(() => {
-          this.levelComplete();
-        }, 500);
-      }
-    } else {
-      this.playSound('bump');
-    }
-  }
-
-  updatePlayerPosition() {
-    const player = document.getElementById('player');
-    const cellSize = 40;
-    if (!player) return;
-    player.style.left = (this.playerPos.x * cellSize) + 'px';
-    player.style.top = (this.playerPos.y * cellSize) + 'px';
-  }
-
-  createShapeGame(container) {
-    const gameUI = document.createElement('div');
-    gameUI.className = 'shape-game';
-    gameUI.innerHTML = `
-      <div class="shape-instructions">
-        <h3>🧩 Encuentra la forma correcta</h3>
-        <p>Selecciona la forma que coincide con el patrón de colores</p>
-        <div class="target-pattern" id="targetPattern"></div>
-      </div>
-      <div class="shape-options" id="shapeOptions"></div>
-    `;
-    container.appendChild(gameUI);
-    this.setupShapeGame();
-    this.applyShapeGameStyles();
-  }
-
-  setupShapeGame() {
-    const patterns = [
-      { shape: '🔺', colors: ['red', 'blue', 'yellow'] },
-      { shape: '⭕', colors: ['green', 'orange', 'purple'] },
-      { shape: '⭐', colors: ['yellow', 'red', 'blue'] },
-      { shape: '🔷', colors: ['blue', 'green', 'orange'] }
-    ];
-    const correctPattern = patterns[Math.floor(Math.random() * patterns.length)];
-    const target = document.getElementById('targetPattern');
-    if (target) {
-      target.innerHTML = `
-        <div class="pattern-display">
-          <div class="pattern-shape">${correctPattern.shape}</div>
-          <div class="pattern-colors">
-            ${correctPattern.colors.map(color => `<div class="color-sample" style="background: ${color};"></div>`).join('')}
-          </div>
-        </div>
-      `;
-    }
-    const options = document.getElementById('shapeOptions');
-    if (!options) return;
-    const shuffledPatterns = [...patterns].sort(() => Math.random() - 0.5);
-    shuffledPatterns.forEach(pattern => {
-      const option = document.createElement('div');
-      option.className = 'shape-option';
-      option.innerHTML = `
-        <div class="option-shape">${pattern.shape}</div>
-        <div class="option-colors">
-          ${pattern.colors.map(color => `<div class="color-sample" style="background: ${color};"></div>`).join('')}
-        </div>
-      `;
-      option.onclick = () => {
-        const isCorrect = pattern.shape === correctPattern.shape &&
-                          pattern.colors.every((c, i) => c === correctPattern.colors[i]);
-        if (isCorrect) {
-          this.playSound('success');
-          this.levelComplete();
-        } else {
-          this.playSound('error');
-          this.showError('¡Forma incorrecta! Intenta de nuevo.');
-        }
-      };
-      options.appendChild(option);
+    // 🔧 Fuerza que las flechas se muestren DESPUÉS de todo
+    requestAnimationFrame(() => {
+        const controls = document.querySelector('.maze-controls');
+        if (controls) controls.style.display = 'flex';
     });
-  }
-
-  createRhythmGame(container) {
-    const gameUI = document.createElement('div');
-    gameUI.className = 'rhythm-game';
-    gameUI.innerHTML = `
-      <div class="rhythm-instructions">
-        <h3>🎵 ¡Toca al ritmo!</h3>
-        <p>Presiona los botones cuando las notas lleguen al centro</p>
-      </div>
-      <div class="rhythm-track" id="rhythmTrack">
-        <div class="track-line"></div>
-        <div class="hit-zone"></div>
-      </div>
-      <div class="rhythm-controls">
-        <button class="rhythm-btn" onclick="game.hitNote(0)">🔴</button>
-        <button class="rhythm-btn" onclick="game.hitNote(1)">🔵</button>
-        <button class="rhythm-btn" onclick="game.hitNote(2)">🟡</button>
-        <button class="rhythm-btn" onclick="game.hitNote(3)">🟢</button>
-      </div>
-    `;
-    container.appendChild(gameUI);
-    this.startRhythmGame();
-    this.applyRhythmGameStyles();
-  }
-
-  startRhythmGame() {
-    this.notes = [];
-    this.score = 0;
-    this.rhythmActive = true;
-    const spawnNote = () => {
-      if (!this.rhythmActive) return;
-      const track = document.getElementById('rhythmTrack');
-      if (!track) return;
-      const note = document.createElement('div');
-      note.className = 'rhythm-note';
-      note.style.left = Math.floor(Math.random() * 4) * 75 + 'px';
-      track.appendChild(note);
-      this.notes.push({
-        element: note,
-        position: 0,
-        active: true
-      });
-      setTimeout(spawnNote, 1000 + Math.random() * 1000);
-    };
-    this.updateRhythmGame();
-    spawnNote();
-    setTimeout(() => {
-      this.rhythmActive = false;
-      if (this.score >= 10) {
-        this.levelComplete();
-      } else {
-        this.showError('¡Necesitas más puntos! Intenta de nuevo.');
-      }
-    }, 30000);
-  }
-
-  updateRhythmGame() {
-    if (!this.rhythmActive) return;
-    this.notes.forEach((note, index) => {
-      if (note.active) {
-        note.position += 2;
-        note.element.style.top = note.position + 'px';
-        if (note.position > 400) {
-          note.element.remove();
-          note.active = false;
-        }
-      }
-    });
-    this.notes = this.notes.filter(note => note.active);
-    requestAnimationFrame(() => this.updateRhythmGame());
-  }
-
-  hitNote(lane) {
-    const hitNotes = this.notes.filter(note => {
-      const noteLane = Math.round(parseInt(note.element.style.left || '0', 10) / 75);
-      return Math.abs(noteLane - lane) < 1 && note.position > 350 && note.position < 400;
-    });
-    if (hitNotes.length > 0) {
-      const note = hitNotes[0];
-      note.element.remove();
-      note.active = false;
-      this.score++;
-      this.playSound('hit');
-      this.showHitEffect(lane);
-    } else {
-      this.playSound('miss');
-    }
-  }
-
-  showHitEffect(lane) {
-    const effect = document.createElement('div');
-    effect.className = 'hit-effect';
-    effect.style.left = (lane * 75) + 'px';
-    const track = document.getElementById('rhythmTrack');
-    if (track) track.appendChild(effect);
-    setTimeout(() => {
-      effect.remove();
-    }, 500);
-  }
-
-  createCombinationGame(container) {
-    const combinations = [
-      { elements: ['☀️', '💧'], result: '🌈', color: 'yellow' },
-      { elements: ['🔥', '🌿'], result: '🍁', color: 'orange' },
-      { elements: ['🌙', '⭐'], result: '✨', color: 'white' },
-      { elements: ['💧', '❄️'], result: '💎', color: 'turquoise' }
-    ];
-    const combo = combinations[Math.floor(Math.random() * combinations.length)];
-    const gameUI = document.createElement('div');
-    gameUI.className = 'combination-game';
-    gameUI.innerHTML = `
-      <div class="combination-instructions">
-        <h3>🧪 Combina los elementos</h3>
-        <p>Arrastra los dos elementos correctos al círculo mágico para crear: <strong>${this.getColorName(combo.color)}</strong></p>
-      </div>
-      <div class="combination-area">
-        <div class="element-pool" id="elementPool"></div>
-        <div class="combination-circle" id="combinationCircle" data-target="${combo.result}">
-          <div class="circle-label">🌀</div>
-        </div>
-        <div class="combination-result" id="combinationResult"></div>
-      </div>
-    `;
-    container.appendChild(gameUI);
-    this.setupCombinationGame(combo);
-    this.applyCombinationGameStyles();
-  }
-
-  setupCombinationGame(combo) {
-    const pool = document.getElementById('elementPool');
-    const circle = document.getElementById('combinationCircle');
-    const result = document.getElementById('combinationResult');
-    let selected = [];
-    const allElements = ['☀️', '💧', '🔥', '🌿', '🌙', '⭐', '❄️'];
-    const shuffled = [...new Set([...combo.elements, ...allElements])].sort(() => Math.random() - 0.5);
-    shuffled.forEach(symbol => {
-      const el = document.createElement('div');
-      el.className = 'element';
-      el.textContent = symbol;
-      el.setAttribute('draggable', 'true');
-      el.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('symbol', symbol);
-      });
-      el.addEventListener('click', () => {
-        if (!selected.includes(symbol)) {
-          selected.push(symbol);
-          this.playSound('click');
-          this.updateCombinationCircle(selected);
-          if (selected.length === 2) {
-            setTimeout(() => {
-              this.checkCombination(selected, combo);
-            }, 600);
-          }
-        }
-      });
-      pool.appendChild(el);
-    });
-    circle.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      circle.classList.add('dragover');
-    });
-    circle.addEventListener('dragleave', () => {
-      circle.classList.remove('dragover');
-    });
-    circle.addEventListener('drop', (e) => {
-      e.preventDefault();
-      circle.classList.remove('dragover');
-      const symbol = e.dataTransfer.getData('symbol');
-      if (!selected.includes(symbol)) {
-        selected.push(symbol);
-        this.playSound('drop');
-        this.updateCombinationCircle(selected);
-        if (selected.length === 2) {
-          setTimeout(() => {
-            this.checkCombination(selected, combo);
-          }, 600);
-        }
-      }
-    });
-    this.resetCombination = () => {
-      selected = [];
-      this.updateCombinationCircle([]);
-      if (result) result.innerHTML = '';
-    };
-  }
-
-  updateCombinationCircle(symbols) {
-    const circle = document.getElementById('combinationCircle');
-    if (!circle) return;
-    const label = circle.querySelector('.circle-label');
-    label.textContent = symbols.join(' + ') || '🌀';
-  }
-
-  checkCombination(symbols, combo) {
-    const result = document.getElementById('combinationResult');
-    const correct = combo.elements.every(el => symbols.includes(el)) && symbols.length === 2;
-    if (correct) {
-      this.playSound('success');
-      if (result) result.innerHTML = `<p>¡Has creado ${combo.result}! El color <strong>${this.getColorName(combo.color)}</strong> ha sido restaurado.</p>`;
-      setTimeout(() => {
-        this.levelComplete();
-      }, 1000);
-    } else {
-      this.playSound('error');
-      if (result) result.innerHTML = `<p>Combinación incorrecta. Intenta con otros elementos.</p>`;
-      setTimeout(() => {
-        if (typeof this.resetCombination === 'function') this.resetCombination();
-      }, 1200);
-    }
-  }
-
-  createVisualGame(container) {
-    const gameUI = document.createElement('div');
-    gameUI.className = 'visual-game';
-    gameUI.innerHTML = `
-      <div class="visual-instructions">
-        <h3>👁️ Observa con atención</h3>
-        <p>Selecciona el patrón que coincide con el modelo objetivo</p>
-        <div class="visual-target" id="visualTarget"></div>
-      </div>
-      <div class="visual-options" id="visualOptions"></div>
-    `;
-    container.appendChild(gameUI);
-    this.setupVisualGame();
-    this.applyVisualGameStyles();
-  }
-
-  setupVisualGame() {
-    const patterns = [
-      ['🔴', '🔵', '🟡', '🟢'],
-      ['🟡', '🔴', '🟢', '🔵'],
-      ['🔵', '🟡', '🔴', '🟢'],
-      ['🟢', '🔴', '🔵', '🟡']
-    ];
-    const correctPattern = patterns[Math.floor(Math.random() * patterns.length)];
-    const target = document.getElementById('visualTarget');
-    if (target) {
-      target.innerHTML = `
-        <div class="pattern-row">
-          ${correctPattern.map(symbol => `<span class="pattern-symbol">${symbol}</span>`).join('')}
-        </div>
-      `;
-    }
-    const options = document.getElementById('visualOptions');
-    if (!options) return;
-    const shuffled = [...patterns].sort(() => Math.random() - 0.5);
-    shuffled.forEach(pattern => {
-      const option = document.createElement('div');
-      option.className = 'visual-option';
-      option.innerHTML = `
-        <div class="pattern-row">
-          ${pattern.map(symbol => `<span class="pattern-symbol">${symbol}</span>`).join('')}
-        </div>
-      `;
-      option.onclick = () => {
-        const isCorrect = pattern.every((s, i) => s === correctPattern[i]);
-        if (isCorrect) {
-          this.playSound('success');
-          this.levelComplete();
-        } else {
-          this.playSound('error');
-          this.showError('¡Patrón incorrecto! Intenta de nuevo.');
-        }
-      };
-      options.appendChild(option);
-    });
-  }
-
-  createTimedGame(container) {
-    const gameUI = document.createElement('div');
-    gameUI.className = 'timed-game';
-    gameUI.innerHTML = `
-      <div class="timed-instructions">
-        <h3>⏱️ ¡Corre contra el tiempo!</h3>
-        <p>Haz clic en los colores en el orden correcto antes de que se acabe el tiempo</p>
-        <div class="timed-sequence" id="timedSequence"></div>
-        <div class="timed-grid" id="timedGrid"></div>
-        <div class="timer-bar" id="timerBar"></div>
-      </div>
-    `;
-    container.appendChild(gameUI);
-    this.setupTimedGame();
-    this.applyTimedGameStyles();
-  }
-
-  setupTimedGame() {
-    const colors = ['🔴', '🟡', '🔵', '🟢'];
-    const sequence = Array.from({ length: 5 }, () => colors[Math.floor(Math.random() * colors.length)]);
-    const sequenceEl = document.getElementById('timedSequence');
-    const gridEl = document.getElementById('timedGrid');
-    const timerBar = document.getElementById('timerBar');
-    let playerSequence = [];
-    let timeLeft = 10;
-    if (sequenceEl) {
-      sequenceEl.innerHTML = sequence.map(c => `<span class="timed-symbol">${c}</span>`).join('');
-    }
-    if (gridEl) {
-      colors.forEach(color => {
-        const btn = document.createElement('button');
-        btn.className = 'timed-btn';
-        btn.textContent = color;
-        btn.onclick = () => {
-          playerSequence.push(color);
-          this.playSound('click');
-          if (playerSequence.length === sequence.length) {
-            this.checkTimedSequence(playerSequence, sequence);
-          }
-        };
-        gridEl.appendChild(btn);
-      });
-    }
-    const countdown = setInterval(() => {
-      timeLeft--;
-      if (timerBar) {
-        timerBar.style.width = `${(timeLeft / 10) * 100}%`;
-      }
-      if (timeLeft <= 0) {
-        clearInterval(countdown);
-        this.showError('¡Se acabó el tiempo!');
-        setTimeout(() => this.loadLevel(this.currentLevel), 1500);
-      }
-    }, 1000);
-  }
-
-  checkTimedSequence(playerSequence, correctSequence) {
-    const isCorrect = playerSequence.every((c, i) => c === correctSequence[i]);
-    if (isCorrect) {
-      this.playSound('success');
-      this.levelComplete();
-    } else {
-      this.playSound('error');
-      this.showError('¡Secuencia incorrecta!');
-      setTimeout(() => this.loadLevel(this.currentLevel), 1500);
-    }
-  }
-
-  createReflectionGame(container) {
-    const gameUI = document.createElement('div');
-    gameUI.className = 'reflection-game';
-    gameUI.innerHTML = `
-      <div class="reflection-instructions">
-        <h3>🪞 Encuentra el reflejo correcto</h3>
-        <p>Observa la figura y selecciona su reflejo exacto</p>
-        <div class="reflection-target" id="reflectionTarget"></div>
-      </div>
-      <div class="reflection-options" id="reflectionOptions"></div>
-    `;
-    container.appendChild(gameUI);
-    this.setupReflectionGame();
-    this.applyReflectionGameStyles();
-  }
-
-  setupReflectionGame() {
-    const figures = [
-      ['⬛', '⬜', '⬛'],
-      ['⬜', '⬛', '⬜'],
-      ['⬛', '⬛', '⬜'],
-      ['⬜', '⬛', '⬛']
-    ];
-    const original = figures[Math.floor(Math.random() * figures.length)];
-    const correct = [...original].reverse();
-    const distractors = [
-      [...original],
-      ['⬛', '⬜', '⬜'],
-      ['⬜', '⬜', '⬛'],
-      ['⬛', '⬛', '⬛']
-    ].filter(p => p.join('') !== correct.join(''));
-    const options = [correct, ...distractors].sort(() => Math.random() - 0.5);
-    const target = document.getElementById('reflectionTarget');
-    if (target) {
-      target.innerHTML = `
-        <div class="reflection-row">
-          ${original.map(cell => `<span class="reflection-cell">${cell}</span>`).join('')}
-        </div>
-      `;
-    }
-    const container = document.getElementById('reflectionOptions');
-    if (!container) return;
-    options.forEach(pattern => {
-      const option = document.createElement('div');
-      option.className = 'reflection-option';
-      option.innerHTML = `
-        <div class="reflection-row">
-          ${pattern.map(cell => `<span class="reflection-cell">${cell}</span>`).join('')}
-        </div>
-      `;
-      option.onclick = () => {
-        const isCorrect = pattern.join('') === correct.join('');
-        if (isCorrect) {
-          this.playSound('success');
-          this.levelComplete();
-        } else {
-          this.playSound('error');
-          this.showError('¡Ese no es el reflejo correcto!');
-        }
-      };
-      container.appendChild(option);
-    });
-  }
-
-  createBossGame(container) {
-    const gameUI = document.createElement('div');
-    gameUI.className = 'boss-game';
-    gameUI.innerHTML = `
-      <div class="boss-instructions">
-        <h3>🧙‍♂️ ¡Desafío final!</h3>
-        <p>Completa la secuencia de retos para restaurar el color arcoíris</p>
-        <div class="boss-stage" id="bossStage"></div>
-        <div class="boss-feedback" id="bossFeedback"></div>
-      </div>
-    `;
-    container.appendChild(gameUI);
-    this.startBossSequence();
-    this.applyBossGameStyles();
-  }
-
-  startBossSequence() {
-    const stages = ['memory', 'mixing', 'shape'];
-    this.bossProgress = 0;
-    this.bossStages = stages;
-    this.runBossStage(stages[0]);
-  }
-
-  runBossStage(mechanic) {
-    const stage = document.getElementById('bossStage');
-    const feedback = document.getElementById('bossFeedback');
-    if (!stage || !feedback) return;
-    stage.innerHTML = '';
-    feedback.innerHTML = `<p>Etapa: ${this.getMechanicName(mechanic)}</p>`;
-    switch (mechanic) {
-      case 'memory':
-        this.createMemoryGame(stage);
-        break;
-      case 'mixing':
-        this.createMixingGame(stage); // ✅ Ahora funciona porque createMixingGame define sus propios datos
-        break;
-      case 'shape':
-        this.createShapeGame(stage);
-        break;
-      default:
-        feedback.innerHTML = `<p>Etapa desconocida</p>`;
-    }
-  }
-
-  levelComplete() {
-    if (this.bossStages && this.bossProgress < this.bossStages.length - 1) {
-      this.bossProgress++;
-      this.runBossStage(this.bossStages[this.bossProgress]);
-    } else if (this.currentLevel === 10) {
-      this.unlockedColors.push('rainbow');
-      this.updateColorPalette();
-      this.score += 200;
-      const scoreEl = document.getElementById('scoreDisplay');
-      if (scoreEl) scoreEl.textContent = `Puntos: ${this.score}`;
-      this.showVictoryModal();
-      this.saveProgress();
-      this.playSound('gameComplete');
-    } else {
-      this.currentLevel++;
-      this.loadLevel(this.currentLevel);
-    }
-  }
-
-  getMechanicName(mechanic) {
-    const names = {
-      memory: 'Memoria',
-      mixing: 'Mezcla',
-      shape: 'Formas',
-      rhythm: 'Ritmo',
-      combination: 'Combinación',
-      visual: 'Visual',
-      timed: 'Contrarreloj',
-      reflection: 'Reflejo',
-      boss: 'Desafío Final'
-    };
-    return names[mechanic] || mechanic;
-  }
-
-  // === MÉTODOS ADICIONALES (no usados en niveles 1-10, pero completos) ===
-  createLogicGame(container) {
-    const gameUI = document.createElement('div');
-    gameUI.className = 'logic-game';
-    gameUI.innerHTML = `
-      <div class="logic-instructions">
-        <h3>🧠 Razonamiento lógico</h3>
-        <p>Lee la afirmación y selecciona la opción correcta</p>
-        <div class="logic-question" id="logicQuestion"></div>
-        <div class="logic-options" id="logicOptions"></div>
-      </div>
-    `;
-    container.appendChild(gameUI);
-    this.setupLogicGame();
-    this.applyLogicGameStyles();
-  }
-
-  setupLogicGame() {
-    const puzzles = [
-      {
-        question: 'Si todos los árboles son verdes y este objeto es un árbol, ¿de qué color es?',
-        options: ['Rojo', 'Verde', 'Azul', 'Amarillo'],
-        answer: 1
-      },
-      {
-        question: 'Si el sol sale por el este y se oculta por el oeste, ¿dónde está el amanecer?',
-        options: ['Norte', 'Sur', 'Este', 'Oeste'],
-        answer: 2
-      },
-      {
-        question: 'Si 3 gatos cazan 3 ratones en 3 minutos, ¿cuántos gatos se necesitan para cazar 6 ratones en 6 minutos?',
-        options: ['3', '6', '2', '1'],
-        answer: 0
-      }
-    ];
-    const puzzle = puzzles[Math.floor(Math.random() * puzzles.length)];
-    const questionEl = document.getElementById('logicQuestion');
-    const optionsEl = document.getElementById('logicOptions');
-    if (questionEl) questionEl.textContent = puzzle.question;
-    if (!optionsEl) return;
-    puzzle.options.forEach((opt, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'logic-btn';
-      btn.textContent = opt;
-      btn.onclick = () => {
-        if (i === puzzle.answer) {
-          this.playSound('success');
-          this.levelComplete();
-        } else {
-          this.playSound('error');
-          this.showError('Respuesta incorrecta. Intenta de nuevo.');
-        }
-      };
-      optionsEl.appendChild(btn);
-    });
-  }
-
-  createSequenceGame(container) {
-    const gameUI = document.createElement('div');
-    gameUI.className = 'sequence-game';
-    gameUI.innerHTML = `
-      <div class="sequence-instructions">
-        <h3>🔢 Completa la secuencia</h3>
-        <p>Observa el patrón y elige el siguiente elemento correcto</p>
-        <div class="sequence-pattern" id="sequencePattern"></div>
-        <div class="sequence-options" id="sequenceOptions"></div>
-      </div>
-    `;
-    container.appendChild(gameUI);
-    this.setupSequenceGame();
-    this.applySequenceGameStyles();
-  }
-
-  setupSequenceGame() {
-    const patterns = [
-      { sequence: [1, 2, 3, 4], next: 5 },
-      { sequence: ['🔴', '🟡', '🔵'], next: '🟢' },
-      { sequence: ['A', 'B', 'C'], next: 'D' },
-      { sequence: [2, 4, 6, 8], next: 10 },
-      { sequence: ['⬛', '⬜', '⬛'], next: '⬜' }
-    ];
-    const puzzle = patterns[Math.floor(Math.random() * patterns.length)];
-    const patternEl = document.getElementById('sequencePattern');
-    const optionsEl = document.getElementById('sequenceOptions');
-    if (patternEl) {
-      patternEl.innerHTML = puzzle.sequence.map(el => `<span class="sequence-item">${el}</span>`).join('');
-    }
-    const distractors = [puzzle.next, '❌', '💥', '0', 'Z', '🟥', '🟣', '⬛', '⬜'].filter(el => el !== puzzle.next);
-    const choices = [puzzle.next, ...distractors.sort(() => Math.random() - 0.5).slice(0, 3)].sort(() => Math.random() - 0.5);
-    if (!optionsEl) return;
-    choices.forEach(choice => {
-      const btn = document.createElement('button');
-      btn.className = 'sequence-btn';
-      btn.textContent = choice;
-      btn.onclick = () => {
-        if (choice === puzzle.next) {
-          this.playSound('success');
-          this.levelComplete();
-        } else {
-          this.playSound('error');
-          this.showError('¡Esa no es la opción correcta!');
-        }
-      };
-      optionsEl.appendChild(btn);
-    });
-  }
-
-  createSoundGame(container) {
-    const gameUI = document.createElement('div');
-    gameUI.className = 'sound-game';
-    gameUI.innerHTML = `
-      <div class="sound-instructions">
-        <h3>🔊 Escucha y repite</h3>
-        <p>Escucha la secuencia de sonidos y repítela en el mismo orden</p>
-        <div class="sound-controls" id="soundControls"></div>
-        <div class="sound-feedback" id="soundFeedback"></div>
-      </div>
-    `;
-    container.appendChild(gameUI);
-    this.setupSoundGame();
-    this.applySoundGameStyles();
-  }
-
-  setupSoundGame() {
-    const sounds = ['beep', 'click', 'drop', 'success'];
-    const sequence = Array.from({ length: 4 + this.currentLevel }, () => sounds[Math.floor(Math.random() * sounds.length)]);
-    const playerSequence = [];
-    const controls = document.getElementById('soundControls');
-    const feedback = document.getElementById('soundFeedback');
-    if (!controls) return;
-    sounds.forEach((sound, index) => {
-      const btn = document.createElement('button');
-      btn.className = 'sound-btn';
-      btn.textContent = `🔈 ${index + 1}`;
-      btn.onclick = () => {
-        this.playSound(sound);
-        playerSequence.push(sound);
-        if (playerSequence.length === sequence.length) {
-          setTimeout(() => {
-            this.checkSoundSequence(playerSequence, sequence);
-          }, 500);
-        }
-      };
-      controls.appendChild(btn);
-    });
-    let i = 0;
-    const playNext = () => {
-      if (i < sequence.length) {
-        this.playSound(sequence[i]);
-        i++;
-        setTimeout(playNext, 800);
-      } else if (feedback) {
-        feedback.innerHTML = `<p>¡Ahora repite la secuencia!</p>`;
-      }
-    };
-    setTimeout(playNext, 1000);
-  }
-
-  checkSoundSequence(playerSequence, correctSequence) {
-    const isCorrect = playerSequence.every((s, i) => s === correctSequence[i]);
-    if (isCorrect) {
-      this.playSound('success');
-      this.levelComplete();
-    } else {
-      this.playSound('error');
-      this.showError('¡Secuencia incorrecta! Intenta de nuevo.');
-      setTimeout(() => this.loadLevel(this.currentLevel), 1500);
-    }
-  }
-
-  createReactionGame(container) {
-    const gameUI = document.createElement('div');
-    gameUI.className = 'reaction-game';
-    gameUI.innerHTML = `
-      <div class="reaction-instructions">
-        <h3>⚡ ¡Reacciona rápido!</h3>
-        <p>Haz clic en el símbolo especial tan pronto como aparezca</p>
-        <div class="reaction-zone" id="reactionZone"></div>
-        <div class="reaction-feedback" id="reactionFeedback"></div>
-      </div>
-    `;
-    container.appendChild(gameUI);
-    this.setupReactionGame();
-    this.applyReactionGameStyles();
-  }
-
-  setupReactionGame() {
-    const zone = document.getElementById('reactionZone');
-    const feedback = document.getElementById('reactionFeedback');
-    const symbols = ['🌟', '💥', '⚡', '🔥', '🎯'];
-    const target = '⚡';
-    let clicked = false;
-    if (!zone || !feedback) return;
-    zone.innerHTML = `<p>Prepárate...</p>`;
-    setTimeout(() => {
-      const symbol = symbols[Math.floor(Math.random() * symbols.length)];
-      zone.innerHTML = `<button class="reaction-symbol">${symbol}</button>`;
-      const btn = zone.querySelector('.reaction-symbol');
-      const startTime = performance.now();
-      btn.onclick = () => {
-        if (clicked) return;
-        clicked = true;
-        const reactionTime = performance.now() - startTime;
-        if (symbol === target && reactionTime < 1000) {
-          this.playSound('success');
-          feedback.innerHTML = `<p>¡Excelente reflejo! Tiempo: ${Math.floor(reactionTime)} ms</p>`;
-          setTimeout(() => this.levelComplete(), 1000);
-        } else {
-          this.playSound('error');
-          feedback.innerHTML = `<p>¡Fallaste! Era ${target} o tardaste demasiado.</p>`;
-          setTimeout(() => this.loadLevel(this.currentLevel), 1500);
-        }
-      };
-    }, 2000 + Math.random() * 2000);
-  }
-
-  createStrategyGame(container) {
-    const gameUI = document.createElement('div');
-    gameUI.className = 'strategy-game';
-    gameUI.innerHTML = `
-      <div class="strategy-instructions">
-        <h3>♟️ Estrategia y planificación</h3>
-        <p>Activa todos los nodos sin pasar dos veces por el mismo</p>
-        <div class="strategy-grid" id="strategyGrid"></div>
-        <div class="strategy-feedback" id="strategyFeedback"></div>
-      </div>
-    `;
-    container.appendChild(gameUI);
-    this.setupStrategyGame();
-    this.applyStrategyGameStyles();
-  }
-
-  setupStrategyGame() {
-    const gridSize = 4;
-    const grid = document.getElementById('strategyGrid');
-    const feedback = document.getElementById('strategyFeedback');
-    this.strategyVisited = [];
-    this.strategyPath = [];
-    if (!grid || !feedback) return;
-    grid.innerHTML = '';
-    for (let y = 0; y < gridSize; y++) {
-      for (let x = 0; x < gridSize; x++) {
-        const cell = document.createElement('div');
-        cell.className = 'strategy-cell';
-        cell.dataset.x = x;
-        cell.dataset.y = y;
-        cell.textContent = '⬜';
-        cell.onclick = () => this.selectStrategyCell(x, y);
-        grid.appendChild(cell);
-      }
-    }
-    feedback.innerHTML = `<p>Selecciona los nodos estratégicamente</p>`;
-  }
-
-  selectStrategyCell(x, y) {
-    const key = `${x},${y}`;
-    if (this.strategyVisited.includes(key)) {
-      this.playSound('error');
-      this.showError('¡Ya pasaste por ese nodo!');
-      return;
-    }
-    this.strategyVisited.push(key);
-    this.strategyPath.push({ x, y });
-    this.playSound('click');
-    const grid = document.getElementById('strategyGrid');
-    if (!grid) return;
-    const cells = grid.querySelectorAll('.strategy-cell');
-    cells.forEach(cell => {
-      if (cell.dataset.x == x && cell.dataset.y == y) {
-        cell.textContent = '🟩';
-        cell.classList.add('visited');
-      }
-    });
-    if (this.strategyVisited.length === 16) {
-      this.playSound('success');
-      const feedback = document.getElementById('strategyFeedback');
-      if (feedback) feedback.innerHTML = `<p>¡Has activado todos los nodos sin repetir!</p>`;
-      setTimeout(() => this.levelComplete(), 1000);
-    }
-  }
-
-  // === Métodos auxiliares adicionales ===
-  showVictoryModal() {
-    const modal = document.createElement('div');
-    modal.className = 'victory-modal';
-    modal.innerHTML = `
-      <div class="modal-content">
-        <h2>🎉 ¡Victoria!</h2>
-        <p>Has restaurado el color al mundo.</p>
-        <button onclick="location.reload()">Jugar de nuevo</button>
-      </div>
-    `;
-    document.body.appendChild(modal);
-  }
-
-  saveProgress() {
-    // Aquí podrías guardar el progreso del jugador
-  }
-
-  applyMemoryGameStyles() { /* Estilos en CSS */ }
-  applyMazeGameStyles() { /* Estilos en CSS */ }
-  applyShapeGameStyles() { /* Estilos en CSS */ }
-  applyRhythmGameStyles() { /* Estilos en CSS */ }
-  applyCombinationGameStyles() { /* Estilos en CSS */ }
-  applyVisualGameStyles() { /* Estilos en CSS */ }
-  applyTimedGameStyles() { /* Estilos en CSS */ }
-  applyReflectionGameStyles() { /* Estilos en CSS */ }
-  applyBossGameStyles() { /* Estilos en CSS */ }
-  applyLogicGameStyles() { /* Estilos en CSS */ }
-  applySequenceGameStyles() { /* Estilos en CSS */ }
-  applySoundGameStyles() { /* Estilos en CSS */ }
-  applyReactionGameStyles() { /* Estilos en CSS */ }
-  applyStrategyGameStyles() { /* Estilos en CSS */ }
 }
+    generateMaze() {
+        const maze = [
+            [1,1,1,1,1,1,1,1],
+            [1,0,0,0,1,0,0,1],
+            [1,0,1,0,1,0,1,1],
+            [1,0,1,0,0,0,0,1],
+            [1,0,1,1,1,1,0,1],
+            [1,0,0,0,0,0,0,1],
+            [1,1,1,1,1,1,1,1]
+        ];
+        const grid = document.getElementById('mazeGrid');
+        grid.innerHTML = '';
+        for (let y = 0; y < maze.length; y++) {
+            for (let x = 0; x < maze[y].length; x++) {
+                const cell = document.createElement('div');
+                cell.className = 'maze-cell';
+                cell.dataset.x = x;
+                cell.dataset.y = y;
+                if (maze[y][x] === 1) {
+                    cell.classList.add('wall');
+                } else {
+                    cell.classList.add('path');
+                }
+                if (x === 6 && y === 5) {
+                    cell.classList.add('exit');
+                    cell.innerHTML = '🚪';
+                }
+                grid.appendChild(cell);
+            }
+        }
+        this.mazeData = maze;
+        this.playerPos = { x: 1, y: 1 };
+        this.updatePlayerPosition();
+    }
+
+    movePlayer(direction) {
+        const { x, y } = this.playerPos;
+        let newX = x;
+        let newY = y;
+        switch (direction) {
+            case 'up': newY--; break;
+            case 'down': newY++; break;
+            case 'left': newX--; break;
+            case 'right': newX++; break;
+        }
+        if (this.mazeData[newY] && this.mazeData[newY][newX] === 0) {
+            this.playerPos = { x: newX, y: newY };
+            this.updatePlayerPosition();
+            this.playSound('move');
+            // Verificar si llegó a la salida
+            if (newX === 6 && newY === 5) {
+                setTimeout(() => {
+                    this.levelComplete();
+                }, 500);
+            }
+        } else {
+            this.playSound('bump');
+        }
+    }
+
+    updatePlayerPosition() {
+        const player = document.getElementById('player');
+        const cellSize = 40; // Tamaño de cada celda
+        player.style.left = (this.playerPos.x * cellSize) + 'px';
+        player.style.top = (this.playerPos.y * cellSize) + 'px';
+    }
+
+    createShapeGame(container) {
+        const gameUI = document.createElement('div');
+        gameUI.className = 'shape-game';
+        gameUI.innerHTML = `
+            <div class="shape-instructions">
+                <h3>🧩 Encuentra la forma correcta</h3>
+                <p>Selecciona la forma que coincide con el patrón de colores</p>
+                <div class="target-pattern" id="targetPattern"></div>
+            </div>
+            <div class="shape-options" id="shapeOptions"></div>
+        `;
+        container.appendChild(gameUI);
+        this.setupShapeGame();
+        this.applyShapeGameStyles();
+    }
+
+    setupShapeGame() {
+        const patterns = [
+            { shape: '🔺', colors: ['red', 'blue', 'yellow'] },
+            { shape: '⭕', colors: ['green', 'orange', 'purple'] },
+            { shape: '⭐', colors: ['yellow', 'red', 'blue'] },
+            { shape: '🔷', colors: ['blue', 'green', 'orange'] }
+        ];
+        const correctPattern = patterns[Math.floor(Math.random() * patterns.length)];
+        // Mostrar patrón objetivo
+        const target = document.getElementById('targetPattern');
+        target.innerHTML = `
+            <div class="pattern-display">
+                <div class="pattern-shape">${correctPattern.shape}</div>
+                <div class="pattern-colors">
+                    ${correctPattern.colors.map(color => `<div class="color-sample" style="background: ${color};"></div>`).join('')}
+                </div>
+            </div>
+        `;
+        // Crear opciones
+        const options = document.getElementById('shapeOptions');
+        const shuffledPatterns = [...patterns].sort(() => Math.random() - 0.5);
+        shuffledPatterns.forEach(pattern => {
+            const option = document.createElement('div');
+            option.className = 'shape-option';
+            option.innerHTML = `
+                <div class="option-shape">${pattern.shape}</div>
+                <div class="option-colors">
+                    ${pattern.colors.map(color => `<div class="color-sample" style="background: ${color};"></div>`).join('')}
+                </div>
+            `;
+            option.onclick = () => {
+                if (pattern === correctPattern) {
+                    this.playSound('success');
+                    this.levelComplete();
+                } else {
+                    this.playSound('error');
+                    this.showError('¡Forma incorrecta! Intenta de nuevo.');
+                }
+            };
+            options.appendChild(option);
+        });
+    }
+
+    createRhythmGame(container) {
+        const gameUI = document.createElement('div');
+        gameUI.className = 'rhythm-game';
+        gameUI.innerHTML = `
+            <div class="rhythm-instructions">
+                <h3>🎵 ¡Toca al ritmo!</h3>
+                <p>Toca los botones cuando las notas lleguen al centro</p>
+            </div>
+            <div class="rhythm-track" id="rhythmTrack">
+                <div class="track-line"></div>
+                <div class="hit-zone"></div>
+            </div>
+            <div class="rhythm-controls">
+                <button class="rhythm-btn" onclick="game.hitNote(0)">🔴</button>
+                <button class="rhythm-btn" onclick="game.hitNote(1)">🔵</button>
+                <button class="rhythm-btn" onclick="game.hitNote(2)">🟡</button>
+                <button class="rhythm-btn" onclick="game.hitNote(3)">🟢</button>
+            </div>
+        `;
+        container.appendChild(gameUI);
+        this.startRhythmGame();
+        this.applyRhythmGameStyles();
+    }
+
+    startRhythmGame() {
+        this.notes = [];
+        this.score = 0;
+        this.rhythmActive = true;
+        const spawnNote = () => {
+            if (!this.rhythmActive) return;
+            const track = document.getElementById('rhythmTrack');
+            const note = document.createElement('div');
+            note.className = 'rhythm-note';
+            note.style.left = Math.random() * 300 + 'px';
+            track.appendChild(note);
+            this.notes.push({
+                element: note,
+                position: 0,
+                active: true
+            });
+            setTimeout(spawnNote, 1000 + Math.random() * 1000);
+        };
+        this.updateRhythmGame();
+        spawnNote();
+        // Terminar el juego después de 30 segundos
+        setTimeout(() => {
+            this.rhythmActive = false;
+            if (this.score >= 10) {
+                this.levelComplete();
+            } else {
+                this.showError('¡Necesitas más puntos! Intenta de nuevo.');
+            }
+        }, 30000);
+    }
+
+    updateRhythmGame() {
+        if (!this.rhythmActive) return;
+        this.notes.forEach((note, index) => {
+            if (note.active) {
+                note.position += 2;
+                note.element.style.top = note.position + 'px';
+                if (note.position > 400) {
+                    note.element.remove();
+                    note.active = false;
+                }
+            }
+        });
+        this.notes = this.notes.filter(note => note.active);
+        requestAnimationFrame(() => this.updateRhythmGame());
+    }
+
+    hitNote(lane) {
+        const hitNotes = this.notes.filter(note => {
+            const noteLane = parseInt(note.element.style.left) / 75;
+            return Math.abs(noteLane - lane) < 1 && note.position > 350 && note.position < 400;
+        });
+        if (hitNotes.length > 0) {
+            const note = hitNotes[0];
+            note.element.remove();
+            note.active = false;
+            this.score++;
+            this.playSound('hit');
+            // Mostrar efecto visual
+            this.showHitEffect(lane);
+        } else {
+            this.playSound('miss');
+        }
+    }
+
+    showHitEffect(lane) {
+        const effect = document.createElement('div');
+        effect.className = 'hit-effect';
+        effect.style.left = (lane * 75) + 'px';
+        document.getElementById('rhythmTrack').appendChild(effect);
+        setTimeout(() => {
+            effect.remove();
+        }, 500);
+    }
+
+    levelComplete() {
+        const currentLevelData = this.levels[this.currentLevel - 1];
+        // Desbloquear color
+        if (!this.unlockedColors.includes(currentLevelData.color)) {
+            this.unlockedColors.push(currentLevelData.color);
+            this.updateColorPalette();
+        }
+        // Añadir puntos
+        this.score += 100;
+        document.getElementById('scoreDisplay').textContent = `Puntos: ${this.score}`;
+        // Mostrar modal de victoria
+        this.showVictoryModal();
+        // Guardar progreso
+        this.saveProgress();
+        this.playSound('victory');
+    }
+
+    showVictoryModal() {
+        const modal = document.getElementById('victoryModal');
+        modal.style.display = 'flex';
+        // Animación de victoria
+        anime({
+            targets: '.modal-content',
+            scale: [0.5, 1],
+            opacity: [0, 1],
+            duration: 500,
+            easing: 'easeOutBack'
+        });
+    }
+
+    nextLevel() {
+        this.closeAllModals();
+        if (this.currentLevel < this.levels.length) {
+            this.currentLevel++;
+            this.loadLevel(this.currentLevel);
+        } else {
+            this.showGameComplete();
+        }
+    }
+
+    showGameComplete() {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.style.display = 'flex';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <h2>¡Felicidades! 🏆</h2>
+                <p>¡Has restaurado todos los colores del mundo mágico!</p>
+                <p>Lúa y todos los habitantes del reino te lo agradecen.</p>
+                <p><strong>Puntuación Final: ${this.score} puntos</strong></p>
+                <button class="modal-btn" onclick="location.reload()">Jugar de Nuevo</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        this.playSound('gameComplete');
+    }
+
+    showError(message) {
+        // Crear notificación de error temporal
+        const notification = document.createElement('div');
+        notification.className = 'error-notification';
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4444;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 25px;
+            z-index: 1000;
+            font-weight: 600;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+        `;
+        document.body.appendChild(notification);
+        setTimeout(() => {
+            notification.remove();
+        }, 3000);
+    }
+
+    showInstructions(mechanic) {
+        const instructions = {
+            memory: 'Memoriza la secuencia de colores y repítela en el orden correcto.',
+            mixing: 'Mezcla los colores primarios para crear nuevos colores.',
+            maze: 'Encuentra la salida del laberinto usando las flechas de dirección.',
+            shape: 'Selecciona la forma que coincide con el patrón de colores mostrado.',
+            rhythm: 'Toca los botones al ritmo cuando las notas lleguen al centro.'
+        };
+        // Mostrar instrucciones por voz si está habilitado
+        if (this.gameSettings.voiceEnabled) {
+            this.speak(instructions[mechanic] || 'Resuelve el desafío para restaurar el color.');
+        }
+    }
+
+    speak(text) {
+        if ('speechSynthesis' in window) {
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'es-ES';
+            utterance.rate = 0.8;
+            speechSynthesis.speak(utterance);
+        }
+    }
+
+    playSound(type) {
+        // Sistema de sonido básico usando Web Audio API
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        const frequencies = {
+            victory: 523.25, // Do
+            success: 659.25, // Mi
+            error: 220.00,   // La baja
+            click: 440.00,    // La
+            beep: 880.00,     // La alta
+            move: 330.00,     // Mi baja
+            drop: 261.63,     // Do baja
+            hit: 523.25,      // Do
+            miss: 196.00      // Sol baja
+        };
+        oscillator.frequency.setValueAtTime(frequencies[type] || 440, audioContext.currentTime);
+        oscillator.type = 'sine';
+        gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+        gainNode.gain.linearRampToValueAtTime(0.3 * (this.gameSettings.sfxVolume / 100), audioContext.currentTime + 0.1);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.3);
+    }
+
+    updateColorPalette() {
+    const dots = document.querySelectorAll('.color-dot');
+    dots.forEach(dot => {
+        const color = dot.id.replace('Dot', '');
+        if (this.unlockedColors.includes(color)) {
+            dot.classList.remove('locked');
+            dot.classList.add('unlocked');
+            dot.style.display = 'block';
+        } else {
+            dot.classList.add('locked');
+            dot.classList.remove('unlocked');
+            dot.style.display = 'none';
+        }
+    });
+}
+
+    saveProgress() {
+        const progress = {
+            currentLevel: this.currentLevel,
+            score: this.score,
+            unlockedColors: this.unlockedColors
+        };
+        localStorage.setItem('chromaquest-progress', JSON.stringify(progress));
+    }
+
+    loadProgress() {
+        const saved = localStorage.getItem('chromaquest-progress');
+        if (saved) {
+            const progress = JSON.parse(saved);
+            this.currentLevel = progress.currentLevel || 1;
+            this.score = progress.score || 0;
+            this.unlockedColors = progress.unlockedColors || [];
+        }
+    }
+
+    closeAllModals() {
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.style.display = 'none';
+        });
+    }
+
+    // Estilos dinámicos para los juegos
+    applyMemoryGameStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .memory-game {
+                text-align: center;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+            .memory-instructions h3 {
+                color: white;
+                font-size: 1.8rem;
+                margin-bottom: 1rem;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            }
+            .memory-instructions p {
+                color: #e0e0e0;
+                font-size: 1.1rem;
+                margin-bottom: 2rem;
+            }
+            .sequence-display {
+                width: 200px;
+                height: 100px;
+                margin: 0 auto 2rem;
+                border: 3px solid white;
+                border-radius: 15px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.2rem;
+                font-weight: bold;
+                color: white;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+                transition: all 0.3s ease;
+            }
+            .color-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 1rem;
+                margin-bottom: 2rem;
+            }
+            .color-btn {
+                width: 80px;
+                height: 80px;
+                border: none;
+                border-radius: 15px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            }
+            .color-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+            }
+            .sequence-input {
+                display: flex;
+                gap: 0.5rem;
+                justify-content: center;
+                min-height: 50px;
+            }
+            .sequence-dot {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                border: 3px solid white;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    applyMixingGameStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .mixing-game {
+                text-align: center;
+                max-width: 700px;
+                margin: 0 auto;
+            }
+            .mixing-instructions h3 {
+                color: white;
+                font-size: 1.8rem;
+                margin-bottom: 1rem;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            }
+            .mixing-instructions p {
+                color: #e0e0e0;
+                font-size: 1.1rem;
+                margin-bottom: 1rem;
+            }
+            .target-color {
+                background: rgba(255,255,255,0.2);
+                padding: 1rem;
+                border-radius: 15px;
+                font-size: 1.3rem;
+                font-weight: bold;
+                color: #2196F3;
+                margin-bottom: 2rem;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            }
+            .mixing-area {
+                display: flex;
+                gap: 2rem;
+                align-items: center;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .color-sources {
+                display: flex;
+                flex-direction: column;
+                gap: 1rem;
+            }
+            .color-source {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                cursor: grab;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+                border: 3px solid white;
+            }
+            .color-source:active {
+                cursor: grabbing;
+                transform: scale(0.9);
+            }
+            .color-source:hover {
+                transform: scale(1.1);
+            }
+            .mixing-pot {
+                width: 150px;
+                height: 150px;
+                border: 3px dashed white;
+                border-radius: 50%;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.3s ease;
+                background: rgba(255,255,255,0.1);
+            }
+            .mixing-pot.dragover {
+                background: rgba(255,255,255,0.3);
+                border-color: #4facfe;
+            }
+            .pot-visual {
+                font-size: 3rem;
+                margin-bottom: 0.5rem;
+            }
+            .mixing-pot p {
+                color: white;
+                font-size: 0.9rem;
+                text-align: center;
+            }
+            .result-display {
+                min-width: 150px;
+                text-align: center;
+            }
+            .result-display p {
+                color: white;
+                font-size: 1.1rem;
+                font-weight: bold;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    applyMazeGameStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .maze-game {
+                text-align: center;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+            .maze-instructions h3 {
+                color: white;
+                font-size: 1.8rem;
+                margin-bottom: 1rem;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            }
+            .maze-instructions p {
+                color: #e0e0e0;
+                font-size: 1.1rem;
+                margin-bottom: 2rem;
+            }
+            .maze-container {
+                position: relative;
+                display: inline-block;
+                margin-bottom: 2rem;
+                border: 3px solid white;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            }
+            .maze-grid {
+                display: grid;
+                grid-template-columns: repeat(8, 40px);
+                grid-template-rows: repeat(7, 40px);
+                gap: 0;
+            }
+            .maze-cell {
+                width: 40px;
+                height: 40px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.5rem;
+            }
+            .maze-cell.wall {
+                background: #666;
+            }
+            .maze-cell.path {
+                background: #f0f0f0;
+            }
+            .maze-cell.exit {
+                background: #ff4444;
+                animation: pulse 1s infinite;
+            }
+            .player {
+                position: absolute;
+                width: 30px;
+                height: 30px;
+                font-size: 1.5rem;
+                transition: all 0.3s ease;
+                z-index: 10;
+                left: 5px;
+                top: 5px;
+            }
+            .maze-controls {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 0.5rem;
+            }
+            .maze-controls div {
+                display: flex;
+                gap: 0.5rem;
+            }
+            .maze-btn {
+                width: 50px;
+                height: 50px;
+                border: none;
+                border-radius: 10px;
+                background: linear-gradient(45deg, #667eea, #764ba2);
+                color: white;
+                font-size: 1.5rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            }
+            .maze-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+            }
+            .maze-btn:active {
+                transform: scale(0.9);
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    applyShapeGameStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .shape-game {
+                text-align: center;
+                max-width: 600px;
+                margin: 0 auto;
+            }
+            .shape-instructions h3 {
+                color: white;
+                font-size: 1.8rem;
+                margin-bottom: 1rem;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            }
+            .shape-instructions p {
+                color: #e0e0e0;
+                font-size: 1.1rem;
+                margin-bottom: 2rem;
+            }
+            .target-pattern {
+                background: rgba(255,255,255,0.2);
+                padding: 2rem;
+                border-radius: 15px;
+                margin-bottom: 2rem;
+                border: 3px solid white;
+            }
+            .pattern-display {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+            .pattern-shape {
+                font-size: 4rem;
+            }
+            .pattern-colors {
+                display: flex;
+                gap: 0.5rem;
+            }
+            .color-sample {
+                width: 30px;
+                height: 30px;
+                border-radius: 50%;
+                border: 2px solid white;
+            }
+            .shape-options {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1.5rem;
+            }
+            .shape-option {
+                background: rgba(255,255,255,0.2);
+                padding: 1.5rem;
+                border-radius: 15px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                border: 3px solid transparent;
+            }
+            .shape-option:hover {
+                background: rgba(255,255,255,0.3);
+                transform: scale(1.05);
+                border-color: #4facfe;
+            }
+            .option-shape {
+                font-size: 3rem;
+                margin-bottom: 1rem;
+            }
+            .option-colors {
+                display: flex;
+                gap: 0.5rem;
+                justify-content: center;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    applyRhythmGameStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .rhythm-game {
+                text-align: center;
+                max-width: 500px;
+                margin: 0 auto;
+            }
+            .rhythm-instructions h3 {
+                color: white;
+                font-size: 1.8rem;
+                margin-bottom: 1rem;
+                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            }
+            .rhythm-instructions p {
+                color: #e0e0e0;
+                font-size: 1.1rem;
+                margin-bottom: 2rem;
+            }
+            .rhythm-track {
+                position: relative;
+                width: 350px;
+                height: 400px;
+                margin: 0 auto 2rem;
+                background: rgba(255,255,255,0.1);
+                border-radius: 15px;
+                overflow: hidden;
+                border: 3px solid white;
+            }
+            .track-line {
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 50%;
+                height: 2px;
+                background: rgba(255,255,255,0.3);
+            }
+            .hit-zone {
+                position: absolute;
+                left: 0;
+                right: 0;
+                bottom: 50px;
+                height: 50px;
+                background: rgba(79, 172, 254, 0.3);
+                border: 2px solid #4facfe;
+            }
+            .rhythm-note {
+                position: absolute;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background: linear-gradient(45deg, #ff6b6b, #ffa726);
+                border: 3px solid white;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            }
+            .rhythm-controls {
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+            }
+            .rhythm-btn {
+                width: 60px;
+                height: 60px;
+                border: none;
+                border-radius: 50%;
+                font-size: 2rem;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+                border: 3px solid white;
+            }
+            .rhythm-btn:hover {
+                transform: scale(1.1);
+                box-shadow: 0 12px 35px rgba(0,0,0,0.3);
+            }
+            .rhythm-btn:active {
+                transform: scale(0.9);
+            }
+            .hit-effect {
+                position: absolute;
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: radial-gradient(circle, rgba(79, 172, 254, 0.8) 0%, transparent 70%);
+                animation: hitEffect 0.5s ease-out;
+                bottom: 25px;
+            }
+            @keyframes hitEffect {
+                0% { transform: scale(0.5); opacity: 1; }
+                100% { transform: scale(2); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    goBack() {
+        document.getElementById('gameLevel').style.display = 'none';
+        document.getElementById('mainMenu').style.display = 'block';
+        this.rhythmActive = false; // Detener juego de ritmo si está activo
+    }
+
+    showGallery() {
+        alert('🎨 Galería de Colores\nAquí verás todos los colores que has restaurado en tu aventura.\n¡Completa los niveles para desbloquear más colores!');
+    }
+
+    showSettings() {
+  const panel = document.getElementById('settingsPanel');
+  if (!panel) return;
+  panel.style.display = 'block';
+  panel.style.top = '50%';
+  panel.style.transform = 'translate(-50%, -50%) scale(0.95)';
+  anime({
+    targets: panel,
+    scale: [0.95, 1],
+    opacity: [0, 1],
+    duration: 300,
+    easing: 'easeOutQuad'
+  });
+}
+
+    closeSettings() {
+        const panel = document.getElementById('settingsPanel');
+        if (panel) {
+            // Primero animamos la salida
+            anime({
+                targets: panel,
+                scale: [1, 0.8],
+                opacity: [1, 0],
+                duration: 300,
+                easing: 'easeInBack',
+                complete: function() {
+                    panel.style.display = 'none';
+                    // Restaurar la posición original
+                    panel.style.top = '50%';
+                }
+            });
+        }
+    }
+
+    toggleVoice() {
+        this.gameSettings.voiceEnabled = !this.gameSettings.voiceEnabled;
+        const voiceToggle = document.getElementById('voiceToggle');
+        if (voiceToggle) {
+            voiceToggle.classList.toggle('active', this.gameSettings.voiceEnabled);
+        }
+        this.saveSettings();
+    }
+
+    toggleColorblind() {
+        this.gameSettings.colorblindMode = !this.gameSettings.colorblindMode;
+        const colorblindToggle = document.getElementById('colorblindToggle');
+        if (colorblindToggle) {
+            colorblindToggle.classList.toggle('active', this.gameSettings.colorblindMode);
+        }
+        this.saveSettings();
+        // Aplicar modo daltónico
+        if (this.gameSettings.colorblindMode) {
+            document.body.classList.add('colorblind-mode');
+        } else {
+            document.body.classList.remove('colorblind-mode');
+        }
+    }
+
+    closeWelcomeModal() {
+        const modal = document.getElementById('welcomeModal');
+        if (modal) {
+            modal.style.display = 'none';
+        }
+    }
+}
+
+// Funciones globales para los botones
+let game;
+
+function startGame() {
+    game.startGame();
+}
+
+function goBack() {
+    game.goBack();
+}
+
+function showGallery() {
+    game.showGallery();
+}
+
+function showSettings() {
+    game.showSettings();
+}
+
+function closeSettings() {
+    game.closeSettings();
+}
+
+function nextLevel() {
+    game.nextLevel();
+}
+
+function closeWelcomeModal() {
+    game.closeWelcomeModal();
+}
+
+// Inicializar el juego cuando se carga la página
+document.addEventListener('DOMContentLoaded', () => {
+    game = new ChromaQuest();
+    game.loadProgress();
+});
+
+// Prevenir el menú contextual en dispositivos táctiles
+document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+});
+
+// Hacer el juego responsive
+document.addEventListener('DOMContentLoaded', () => {
+    // Ajustar el viewport para dispositivos móviles
+    const viewport = document.querySelector('meta[name="viewport"]');
+    if (viewport) {
+        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+    }
+    // Prevenir zoom en dispositivos iOS
+    document.addEventListener('gesturestart', (e) => {
+        e.preventDefault();
+    });
+    document.addEventListener('gesturechange', (e) => {
+        e.preventDefault();
+    });
+    document.addEventListener('gestureend', (e) => {
+        e.preventDefault();
+    });
+});
