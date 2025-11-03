@@ -2,79 +2,42 @@
   "name": "ChromaQuest: El Mundo sin Color",
   "short_name": "ChromaQuest",
   "description": "Juego educativo para niños de 10-14 años sobre colores y creatividad. Ayuda a Lúa a devolverle el color al mundo mágico.",
-  "version": "1.0.3",
-  "id": "/chromaquest-educativo/",
-  "start_url": "/chromaquest-educativo/",
-  "scope": "/chromaquest-educativo/",
+  "start_url": "/",
   "display": "standalone",
-  "display_override": ["minimal-ui"],
-  "orientation": "portrait-primary",
+  "orientation": "portrait",
   "theme_color": "#667eea",
   "background_color": "#764ba2",
+  "categories": ["games", "education", "family"],
   "lang": "es-ES",
   "dir": "ltr",
-  "categories": ["games", "education", "family"],
   "icons": [
     {
-      "src": "/chromaquest-educativo/icon-192.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/chromaquest-educativo/icon-512.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "/chromaquest-educativo/icon-1024.png",
-      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"
     }
   ],
   "screenshots": [
     {
-      "src": "/chromaquest-educativo/screenshot-1-390x844.png",
+      "src": "screenshot-mobile-1.png",
       "sizes": "390x844",
       "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Pantalla de inicio del juego"
+      "form_factor": "narrow"
     },
     {
-      "src": "/chromaquest-educativo/screenshot-2-390x844.png",
+      "src": "screenshot-mobile-2.png",
       "sizes": "390x844",
       "type": "image/png",
-      "form_factor": "narrow",
-      "label": "Nivel de mezcla de colores"
+      "form_factor": "narrow"
     }
   ],
-  "shortcuts": [
-    {
-      "name": "Jugar ahora",
-      "short_name": "Jugar",
-      "description": "Entrar directamente al juego",
-      "url": "/chromaquest-educativo/",
-      "icons": [
-        {
-          "src": "/chromaquest-educativo/icon-192.png",
-          "sizes": "192x192"
-        }
-      ]
-    }
-  ],
-  "share_target": {
-    "action": "/chromaquest-educativo/",
-    "method": "GET",
-    "enctype": "application/x-www-form-urlencoded",
-    "params": {
-      "title": "title",
-      "text": "text",
-      "url": "url"
-    }
-  },
   "related_applications": [],
-  "prefer_related_applications": false,
-  "iarc_rating_id": "e84b072d-71b2-4d3a-a519-0a254c25eb5a"
+  "prefer_related_applications": false
 }
