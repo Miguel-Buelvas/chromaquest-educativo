@@ -926,16 +926,16 @@ class ChromaQuest {
         const style = document.createElement('style');
         style.textContent = `
             .maze-game {
-                text-align: center;
-                max-width: 500px;
-                margin: 0 auto;
-            }
+    text-align: center;
+    max-width: 400px;
+    margin: 0 auto;
+}
             .maze-instructions h3 {
-                color: white;
-                font-size: 1.8rem;
-                margin-bottom: 1rem;
-                text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            }
+    color: white;
+    font-size: 1.4rem;
+    margin-bottom: 0.5rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+}
             .maze-instructions p {
                 color: #e0e0e0;
                 font-size: 1.1rem;
@@ -995,17 +995,17 @@ class ChromaQuest {
                 gap: 0.5rem;
             }
             .maze-btn {
-                width: 50px;
-                height: 50px;
-                border: none;
-                border-radius: 10px;
-                background: linear-gradient(45deg, #667eea, #764ba2);
-                color: white;
-                font-size: 1.5rem;
-                cursor: pointer;
-                transition: all 0.3s ease;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            }
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    color: white;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+}
             .maze-btn:hover {
                 transform: scale(1.1);
                 box-shadow: 0 8px 25px rgba(0,0,0,0.3);
@@ -1266,6 +1266,13 @@ class ChromaQuest {
 
 // Funciones globales para los botones
 let game;
+function resetGame() {
+    if (confirm('¿Borrar todo tu progreso y empezar de nuevo?')) {
+        localStorage.removeItem('chromaquest-progress');
+        localStorage.removeItem('chromaquest-settings');
+        location.reload();
+    }
+}
 
 function startGame() {
     game.startGame();
