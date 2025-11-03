@@ -2,7 +2,7 @@
   "name": "ChromaQuest: El Mundo sin Color",
   "short_name": "ChromaQuest",
   "description": "Juego educativo para niños de 10-14 años sobre colores y creatividad. Ayuda a Lúa a devolverle el color al mundo mágico.",
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "orientation": "portrait",
   "theme_color": "#667eea",
