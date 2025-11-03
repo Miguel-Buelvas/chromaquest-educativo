@@ -34,7 +34,7 @@ class ChromaQuest {
     /* 🔊 Desbloquear y probar voz real */
     const unlockVoice = () => {
         if ('speechSynthesis' in window) {
-            const msg = new SpeechSynthesisUtterance('¡Hola, soy Lúa! Vamos a devolverle el color al mundo.');
+            const msg = new SpeechSynthesisUtterance('¡Hola, soy Miguel! Vamos a devolverle el color al mundo.');
             msg.lang = 'es-ES';
             msg.rate = 0.9;
             msg.volume = 1; // 🔊 máximo
