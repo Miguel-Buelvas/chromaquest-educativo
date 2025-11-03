@@ -120,46 +120,65 @@
             position: relative;
         }
 
+        /* ── ENCABEZADO DEL NIVEL ── */
         .level-header {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
+            top: 24px;
+            left: 24px;
+            right: 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             z-index: 5;
+            padding: 10px 18px;
+            background: rgba(0, 0, 0, 0.45);
+            border-radius: 18px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(4px);
         }
 
         .level-title {
             color: white;
-            font-size: 1.5rem;
+            font-size: clamp(1.1rem, 4vw, 1.4rem);
             font-weight: 700;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+            max-width: 55%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            margin: 0;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.15);
+            border: 2px solid white;
+            color: white;
+            padding: 0.45rem 1rem;
+            border-radius: 22px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: all 0.25s ease;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
         }
 
         .score-display {
             color: white;
-            font-size: 1.2rem;
+            font-size: 1.05rem;
             font-weight: 600;
-            background: rgba(0,0,0,0.3);
-            padding: 0.5rem 1rem;
-            border-radius: 25px;
-        }
-
-        .back-btn {
-            background: rgba(255,255,255,0.2);
-            border: 2px solid white;
-            color: white;
-            padding: 0.5rem 1rem;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover {
-            background: rgba(255,255,255,0.3);
+            background: rgba(0, 0, 0, 0.35);
+            padding: 0.45rem 1rem;
+            border-radius: 22px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
         }
 
         .game-area {
@@ -434,12 +453,6 @@
         @media (prefers-reduced-motion: reduce) {
           * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
         }
-
-        /* Flechas ocultas hasta que el laberinto esté listo */
-        .maze-controls { display: none; }
-
-        /* Colores bloqueados ocultos */
-        .color-dot.locked { display: none; }
     </style>
 </head>
 <body>
