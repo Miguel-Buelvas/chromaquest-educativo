@@ -26,12 +26,24 @@ class ChromaQuest {
     }
 
     init() {
-        this.loadSettings();
-        this.setupEventListeners();
-        this.updateColorPalette();
-        this.animateTitle();
-    }
+    this.loadSettings();
+    this.setupEventListeners();
+    this.updateColorPalette();
+    this.animateTitle();
 
+    /* 🔊 Desbloquear y probar voz real */
+    const unlockVoice = () => {
+        if ('speechSynthesis' in window) {
+            const msg = new SpeechSynthesisUtterance('¡Hola, soy Lúa! Vamos a devolverle el color al mundo.');
+            msg.lang = 'es-ES';
+            msg.rate = 0.9;
+            msg.volume = 1; // 🔊 máximo
+            speechSynthesis.speak(msg);
+            document.removeEventListener('click', unlockVoice);
+        }
+    };
+    document.addEventListener('click', unlockVoice, { once: true });
+}
     loadSettings() {
         const saved = localStorage.getItem('chromaquest-settings');
         if (saved) {
