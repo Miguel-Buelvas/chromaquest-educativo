@@ -325,31 +325,36 @@ class ChromaQuest {
     }
 
     createMazeGame(container) {
-        const gameUI = document.createElement('div');
-        gameUI.className = 'maze-game';
-        gameUI.innerHTML = `
-            <div class="maze-instructions">
-                <h3>🗺️ Encuentra la salida del laberinto</h3>
-                <p>Usa las flechas para moverte y encuentra la puerta roja</p>
+    const gameUI = document.createElement('div');
+    gameUI.className = 'maze-game';
+    gameUI.innerHTML = `
+        <div class="maze-instructions">
+            <h3>🗺️ Encuentra la salida del laberinto</h3>
+            <p>Usa las flechas para moverte y encuentra la puerta roja</p>
+        </div>
+        <div class="maze-container" id="mazeContainer">
+            <div class="maze-grid" id="mazeGrid"></div>
+            <div class="player" id="player">🧙‍♀️</div>
+        </div>
+        <div class="maze-controls" style="display:none;">
+            <button class="maze-btn" onclick="game.movePlayer('up')">↑</button>
+            <div>
+                <button class="maze-btn" onclick="game.movePlayer('left')">←</button>
+                <button class="maze-btn" onclick="game.movePlayer('down')">↓</button>
+                <button class="maze-btn" onclick="game.movePlayer('right')">→</button>
             </div>
-            <div class="maze-container" id="mazeContainer">
-                <div class="maze-grid" id="mazeGrid"></div>
-                <div class="player" id="player">🧙‍♀️</div>
-            </div>
-            <div class="maze-controls">
-                <button class="maze-btn" onclick="game.movePlayer('up')">↑</button>
-                <div>
-                    <button class="maze-btn" onclick="game.movePlayer('left')">←</button>
-                    <button class="maze-btn" onclick="game.movePlayer('down')">↓</button>
-                    <button class="maze-btn" onclick="game.movePlayer('right')">→</button>
-                </div>
-            </div>
-        `;
-        container.appendChild(gameUI);
-        this.generateMaze();
-        this.applyMazeGameStyles();
-    }
+        </div>
+    `;
+    container.appendChild(gameUI);
+    this.generateMaze();
+    this.applyMazeGameStyles();
 
+    // 🔧 Fuerza que las flechas se muestren DESPUÉS de todo
+    requestAnimationFrame(() => {
+        const controls = document.querySelector('.maze-controls');
+        if (controls) controls.style.display = 'flex';
+    });
+}
     generateMaze() {
         const maze = [
             [1,1,1,1,1,1,1,1],
@@ -707,14 +712,20 @@ class ChromaQuest {
     }
 
     updateColorPalette() {
-        this.unlockedColors.forEach(color => {
-            const dot = document.getElementById(color + 'Dot');
-            if (dot) {
-                dot.classList.remove('locked');
-                dot.classList.add('unlocked');
-            }
-        });
-    }
+    const dots = document.querySelectorAll('.color-dot');
+    dots.forEach(dot => {
+        const color = dot.id.replace('Dot', '');
+        if (this.unlockedColors.includes(color)) {
+            dot.classList.remove('locked');
+            dot.classList.add('unlocked');
+            dot.style.display = 'block';
+        } else {
+            dot.classList.add('locked');
+            dot.classList.remove('unlocked');
+            dot.style.display = 'none';
+        }
+    });
+}
 
     saveProgress() {
         const progress = {
